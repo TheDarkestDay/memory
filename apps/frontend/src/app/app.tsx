@@ -1,16 +1,42 @@
-import styled from '@emotion/styled';
-import NxWelcome from './nx-welcome';
+import { Game } from './game';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { httpLink } from '@trpc/client/links/httpLink';
+import { createWSClient, wsLink } from '@trpc/client/links/wsLink';
+import { splitLink } from '@trpc/client/links/splitLink';
 
-const StyledApp = styled.div`
-  // Your style here
-`;
+import { trpc } from './trpc';
 
-export function App() {
+const wsClient = createWSClient({
+  url: 'ws://localhost:3001',
+});
+
+const client = trpc.createClient({
+  links: [
+    splitLink({
+      condition(op) {
+        return op.type === 'subscription';
+      },
+      // left: wsLink({
+      //   client: wsClient,
+      // }),
+      left: httpLink({
+        url: 'http://localhost:3001/trpc',
+      }),
+      right: httpLink({
+        url: 'http://localhost:3001/trpc',
+      }),
+    })
+  ]
+});
+
+const queryClient = new QueryClient();
+
+export const App = () => {
   return (
-    <StyledApp>
-      <NxWelcome title="frontend" />
-    </StyledApp>
-  );
+    <trpc.Provider client={client} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <Game />
+      </QueryClientProvider>
+    </trpc.Provider>
+  )
 }
-
-export default App;
