@@ -1,4 +1,5 @@
 import { router, Subscription } from '@trpc/server';
+import * as zod from 'zod';
 import { EventEmitter } from 'events';
 
 const players: string[] = [];
@@ -25,11 +26,13 @@ export const createRouterWithContext = <TContext>() => {
       }
     })
     .mutation('joinGame', {
-      resolve() {
-        const currentPlayersCount = players.length;
-        const newPlayerName = `Player ${currentPlayersCount + 1}`;
+      input: zod.object({
+        playerName: zod.string(),
+      }),
+      resolve({input}) {
+        const { playerName } = input;
 
-        rootEmitter.emit('playerJoined', newPlayerName);
+        rootEmitter.emit('playerJoined', playerName);
       }
     });
 };
