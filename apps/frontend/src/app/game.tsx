@@ -3,6 +3,7 @@ import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { trpc } from './trpc';
 
 export const Game = () => {
+  const [isFormSubmitted, setFormSubmitted] = useState<boolean>(false);
   const [playerName, setPlayerName] = useState<string>('');
   const [players, setPlayers] = useState<string[]>([]);
   const joinGame = trpc.useMutation('joinGame');
@@ -11,7 +12,10 @@ export const Game = () => {
     event.preventDefault();
 
     joinGame.mutateAsync({playerName})
-      .then(() => console.log('Joined game'))
+      .then(() => {
+        console.log('Joined game');
+        setFormSubmitted(true);
+      })
       .catch((error) => {
         console.error(error);
       });
@@ -21,11 +25,12 @@ export const Game = () => {
     setPlayerName(event.target.value);
   };
 
-  trpc.useSubscription(['onPlayerJoined', undefined], {
+  trpc.useSubscription(['joinedPlayersChange', {playerName}], {
     onNext(joinedPlayers) {
       console.log(`Got something from subscription: ${joinedPlayers}`);
       setPlayers(joinedPlayers);
-    }
+    },
+    enabled: isFormSubmitted,
   });
 
   return (

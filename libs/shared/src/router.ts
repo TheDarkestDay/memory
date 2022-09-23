@@ -8,19 +8,40 @@ const rootEmitter = new EventEmitter();
 
 export const createRouterWithContext = <TContext>() => {
   return router<TContext>()
-    .subscription('onPlayerJoined', {
-      resolve() {
+    .subscription('joinedPlayersChange', {
+      input: zod.object({
+        playerName: zod.string(),
+      }),
+      resolve({input}) {
+        const { playerName } = input;
+
         return new Subscription<string[]>((emit) => {
-          const handlePlayerJoined = (playerName: string) => {
-            players.push(playerName);
+          const handlePlayerJoined = (joinedPlayerName: string) => {
+            players.push(joinedPlayerName);
 
             emit.data(players);
           };
 
+        //  handlePlayerJoined(playerName);
+
+          const handlePlayerLeft = (playerToRemove: string) => {
+            const playerToRemoveIndex = players.indexOf(playerToRemove);
+
+            if (playerToRemoveIndex !== -1) {
+              players.splice(playerToRemoveIndex, 1);
+
+              emit.data(players);
+            }
+          };
+
           rootEmitter.on('playerJoined', handlePlayerJoined);
+          rootEmitter.on('playerLeft', handlePlayerLeft);
 
           return () => {
             rootEmitter.off('playerJoined', handlePlayerJoined);
+            rootEmitter.off('playerLeft', handlePlayerLeft); 
+            
+            rootEmitter.emit('playerLeft', playerName);
           };
         })
       }
@@ -34,7 +55,7 @@ export const createRouterWithContext = <TContext>() => {
 
         rootEmitter.emit('playerJoined', playerName);
       }
-    });
+    })
 };
 
 export type AppRouter = ReturnType<typeof createRouterWithContext>;
