@@ -16,32 +16,24 @@ export const createRouterWithContext = <TContext>() => {
         const { playerName } = input;
 
         return new Subscription<string[]>((emit) => {
-          const handlePlayerJoined = (joinedPlayerName: string) => {
-            players.push(joinedPlayerName);
-
+          const handleConnectedPlayersChange = () => {
             emit.data(players);
           };
 
-        //  handlePlayerJoined(playerName);
+          handleConnectedPlayersChange();
 
-          const handlePlayerLeft = (playerToRemove: string) => {
-            const playerToRemoveIndex = players.indexOf(playerToRemove);
+          rootEmitter.on('connectedPlayersChange', handleConnectedPlayersChange);
+
+          return () => {
+            rootEmitter.off('connectedPlayersChange', handleConnectedPlayersChange);
+            
+            const playerToRemoveIndex = players.indexOf(playerName);
 
             if (playerToRemoveIndex !== -1) {
               players.splice(playerToRemoveIndex, 1);
 
-              emit.data(players);
+              rootEmitter.emit('connectedPlayersChange');
             }
-          };
-
-          rootEmitter.on('playerJoined', handlePlayerJoined);
-          rootEmitter.on('playerLeft', handlePlayerLeft);
-
-          return () => {
-            rootEmitter.off('playerJoined', handlePlayerJoined);
-            rootEmitter.off('playerLeft', handlePlayerLeft); 
-            
-            rootEmitter.emit('playerLeft', playerName);
           };
         })
       }
@@ -53,7 +45,9 @@ export const createRouterWithContext = <TContext>() => {
       resolve({input}) {
         const { playerName } = input;
 
-        rootEmitter.emit('playerJoined', playerName);
+        players.push(playerName);
+
+        rootEmitter.emit('connectedPlayersChange');
       }
     })
 };
