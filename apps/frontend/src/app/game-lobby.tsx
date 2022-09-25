@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { GameField } from './game-field';
 import { trpc } from './trpc';
 
 type Props = {
@@ -7,13 +8,28 @@ type Props = {
 
 export const GameLobby = ({playerName}: Props) => {
   const [players, setPlayers] = useState<string[]>([]);
+  const [isGameStarted, setGameStarted] = useState(false);
+  const [fieldSize, setFieldSize] = useState(0);
+
+  const startGame = trpc.useMutation('startGame');
 
   trpc.useSubscription(['joinedPlayersChange', {playerName}], {
     onNext(joinedPlayers) {
-      console.log(`Got something from subscription: ${joinedPlayers}`);
       setPlayers(joinedPlayers);
     },
   });
+
+  trpc.useSubscription(['gameStart'], {
+    onNext(gameSize: number) {
+      setFieldSize(gameSize);
+      setGameStarted(true);
+    }
+  });
+
+  const handleStartButtonClick = () => {
+    startGame.mutateAsync({fieldSize: 4})
+      .then(() => setGameStarted(true));
+  };
   
   return (
     <section>
@@ -24,6 +40,12 @@ export const GameLobby = ({playerName}: Props) => {
       <ul>
         {players.map((player) => <li key={player}>{player}</li>)}
       </ul>
+
+      <button onClick={handleStartButtonClick}>
+        Start game
+      </button>
+
+      {isGameStarted && <GameField size={fieldSize} />}
     </section>
   );
 };
