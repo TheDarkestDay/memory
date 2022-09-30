@@ -68,25 +68,11 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
               actions: [
                 assign<GameContext>((context, event) => {
                   const { row, col } = event as unknown as TakeOneEvent;
-                  const [[firstRevealedRow, firstRevealedCol]] = context.revealedCells;
     
-                  const { field, scores, currentPlayer, capturedCells } = context;
-    
-                  const firstCell = field[firstRevealedRow][firstRevealedCol];
-                  const secondCell = field[row][col];
-    
-                  if (firstCell === secondCell) {
-                    return {
-                      ...context,
-                      capturedCells: capturedCells.concat([firstRevealedRow, firstRevealedCol], [row, col]),
-                      scores: {
-                        ...scores,
-                        [currentPlayer]: scores[currentPlayer] + 1,
-                      }
-                    };
-                  }
-    
-                  return context;
+                  return {
+                    ...context,
+                    revealedCells: [...context.revealedCells, [row, col]],
+                  };
                 })
               ]
             }
@@ -109,13 +95,30 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
             {
               target: 'pending',
               actions: assign<GameContext>((context) => {
-                const { players, currentPlayer } = context;
-                const currentPlayerIndex = players.findIndex((playerName) => playerName === currentPlayer);
+                const { players, field, scores, currentPlayer, capturedCells } = context;
+                const [[firstRevealedRow, firstRevealedCol], [secondRevealedRow, secondRevealedCol]] = context.revealedCells;
 
+                const currentPlayerIndex = players.findIndex((playerName) => playerName === currentPlayer);
                 const nextPlayer = players[currentPlayerIndex + 1] || players[0];
+
+                const firstCell = field[firstRevealedRow][firstRevealedCol];
+                const secondCell = field[secondRevealedRow][secondRevealedCol];
+
+                const isScored = firstCell === secondCell;
 
                 return {
                   ...context,
+                  capturedCells: capturedCells.concat(
+                    isScored 
+                      ? [[firstRevealedRow, firstRevealedCol], [secondRevealedRow, secondRevealedCol]] 
+                      : []
+                  ),
+                  scores: {
+                    ...scores,
+                    [currentPlayer]: isScored 
+                      ? scores[currentPlayer] + 1 
+                      : scores[currentPlayer],
+                  },
                   revealedCells: [],
                   currentPlayer: nextPlayer,
                 };
