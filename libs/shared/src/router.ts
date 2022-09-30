@@ -1,8 +1,11 @@
 import { router, Subscription } from '@trpc/server';
 import * as zod from 'zod';
 import { EventEmitter } from 'events';
+import { interpret, InterpreterFrom } from 'xstate';
 
+import { createGameMachine, GameContext } from './game-machine';
 import { shuffleArray } from './utils';
+import { GameUiState, getGameUiStateFromContext } from './game-ui-state';
 
 const characters = [
   '❤️', 
@@ -43,6 +46,8 @@ type CellOpenedPayload = {
 
 const rootEmitter = new EventEmitter();
 
+let gameService: InterpreterFrom<ReturnType<typeof createGameMachine>> | null = null;
+
 export const createRouterWithContext = <TContext>() => {
   return router<TContext>()
     .subscription('joinedPlayersChange', {
@@ -75,42 +80,26 @@ export const createRouterWithContext = <TContext>() => {
         })
       }
     })
-    .subscription('gameStart', {
+    .subscription('gameStateChange', {
       resolve() {
-        return new Subscription<number>((emit) => {
-          const handleFieldReady = (fieldSize: number) => {
-            emit.data(fieldSize);
+        return new Subscription<GameUiState | null>((emit) => {
+          const handleGameStateChange = (context: GameContext) => {
+            emit.data(
+              getGameUiStateFromContext(context)
+            );
           };
 
-          handleFieldReady(gameField.length);
+          if (gameService == null) {
+            emit.data(null);
+          } else {
+            const gameSnapshot = gameService.getSnapshot();
+            handleGameStateChange(gameSnapshot.context);
+          }
 
-          rootEmitter.on('fieldReady', handleFieldReady);
+          rootEmitter.on('gameStateChange', handleGameStateChange);
 
           return () => {
-            rootEmitter.off('fieldReady', handleFieldReady);
-          };
-        });
-      }
-    })
-    .subscription('cellOpened', {
-      input: zod.object({
-        row: zod.number(),
-        col: zod.number(),
-      }),
-      resolve({input}) {
-        const { row, col } = input;
-
-        return new Subscription<string>((emit) => {
-          const handleCellOpened = ({row: openedRow, col: openedCol, content}: CellOpenedPayload) => {
-            if (openedRow === row && openedCol === col) {
-              emit.data(content);
-            }
-          };
-
-          rootEmitter.on('cellOpened', handleCellOpened);
-
-          return () => {
-            rootEmitter.off('cellOpened', handleCellOpened);
+            rootEmitter.off('gameStateChange', handleGameStateChange);
           };
         });
       }
@@ -135,13 +124,11 @@ export const createRouterWithContext = <TContext>() => {
       resolve({input}) {
         const { row, col } = input;
 
-        const cellContent = gameField[row][col];
-
-        if (cellContent == null) {
-          throw new Error(`Cell in at ${row}:${col} does not exist.`);
+        if (gameService == null) {
+          throw new Error('Tried to reveal a cell when the game has not yet started');
         }
 
-        rootEmitter.emit('cellOpened', {row, col, content: cellContent});
+        gameService.send({type: 'REVEAL_NEXT_CELL', row, col});
       }
     })
     .mutation('startGame', {
@@ -184,7 +171,16 @@ export const createRouterWithContext = <TContext>() => {
           gameField[x2][y2] = character;
         }
 
-        rootEmitter.emit('fieldReady', gameField.length);
+        const gameMachine = createGameMachine({
+          players,
+          field: gameField,
+        });
+
+        gameService = interpret(gameMachine).onTransition((state) => {
+          rootEmitter.emit('gameStateChange', state.context);
+        });
+
+        gameService.start();
       }
     })
 };

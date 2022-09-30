@@ -5,7 +5,7 @@ type GameStateConfig = {
   players: string[];
 };
 
-type GameContext = GameStateConfig & {
+export type GameContext = GameStateConfig & {
   scores: Record<string, number>;
   currentPlayer: string;
   revealedCells: [number, number][];
@@ -28,6 +28,7 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
   return createMachine({
     id: 'game',
     initial: 'pending',
+    predictableActionArguments: true,
     schema: {
       context: {} as GameContext,
     },
@@ -39,59 +40,70 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
       revealedCells: [],
       capturedCells: [],
     },
-    on: {
-      REVEAL_NEXT_CELL: [
-        {
-          target: 'cellsRevealed',
-          cond: (context) => {
-            return context.revealedCells.length === 1;
-          },
-          actions: [
-            assign<GameContext>((context, event) => {
-              const { row, col } = event as unknown as TakeOneEvent;
-
-              return {
-                ...context,
-                revealedCells: [...context.revealedCells, [row, col]],
-              };
-            })
-          ]
+    states: {
+      pending: {
+        on: {
+          REVEAL_NEXT_CELL: [
+            {
+              target: 'cellRevealed',
+              actions: [
+                assign<GameContext>((context, event) => {
+                  const { row, col } = event as unknown as TakeOneEvent;
+    
+                  return {
+                    ...context,
+                    revealedCells: [...context.revealedCells, [row, col]],
+                  };
+                })
+              ]
+            }
+          ],
         },
-        {
-          target: 'countingScore',
-          cond: (context) => {
-            return context.revealedCells.length === 2;
-          },
-          actions: [
-            assign<GameContext>((context, event) => {
-              const { row, col } = event as unknown as TakeOneEvent;
-              const [[firstRevealedRow, firstRevealedCol]] = context.revealedCells;
-
-              const { field, scores, currentPlayer, capturedCells } = context;
-
-              const firstCell = field[firstRevealedRow][firstRevealedCol];
-              const secondCell = field[row][col];
-
-              if (firstCell === secondCell) {
-                return {
-                  ...context,
-                  capturedCells: capturedCells.concat([firstRevealedRow, firstRevealedCol], [row, col]),
-                  scores: {
-                    ...scores,
-                    [currentPlayer]: scores[currentPlayer] + 1,
+      },
+      cellRevealed: {
+        on: {
+          REVEAL_NEXT_CELL: [
+            {
+              target: 'countingScore',
+              actions: [
+                assign<GameContext>((context, event) => {
+                  const { row, col } = event as unknown as TakeOneEvent;
+                  const [[firstRevealedRow, firstRevealedCol]] = context.revealedCells;
+    
+                  const { field, scores, currentPlayer, capturedCells } = context;
+    
+                  const firstCell = field[firstRevealedRow][firstRevealedCol];
+                  const secondCell = field[row][col];
+    
+                  if (firstCell === secondCell) {
+                    return {
+                      ...context,
+                      capturedCells: capturedCells.concat([firstRevealedRow, firstRevealedCol], [row, col]),
+                      scores: {
+                        ...scores,
+                        [currentPlayer]: scores[currentPlayer] + 1,
+                      }
+                    };
                   }
-                };
-              }
-
-              return context;
-            })
+    
+                  return context;
+                })
+              ]
+            }
           ]
         }
-      ],
-    },
-    states: {
-      cellsRevealed: {},
+      },
       countingScore: {
+        invoke: {
+          id: 'passTurnToNextPlayer',
+          src: () => {
+            return (callback) => {
+              setTimeout(() => {
+                callback('PASS_TURN_TO_NEXT_PLAYER');
+              }, 3_000);
+            };
+          }
+        },
         on: {
           PASS_TURN_TO_NEXT_PLAYER: [
             {
@@ -114,6 +126,6 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
       },
     },
   }, {
-    actions: {}
+    actions: {},
   });
 };
