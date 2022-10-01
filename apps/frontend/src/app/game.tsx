@@ -1,11 +1,14 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { GameLobby } from './game-lobby';
+import { useAppStore } from './store';
 
 import { trpc } from './trpc';
 
 export const Game = () => {
+  const playerName = useAppStore((state) => state.playerName);
+  const setPlayerName = useAppStore((state) => state.setPlayerName);
+
   const [isFormSubmitted, setFormSubmitted] = useState<boolean>(false);
-  const [playerName, setPlayerName] = useState<string>('');
   const joinGame = trpc.useMutation('joinGame');
 
   const handlePlayerFormSubmit = (event: FormEvent) => {

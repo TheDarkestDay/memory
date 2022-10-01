@@ -120,15 +120,16 @@ export const createRouterWithContext = <TContext>() => {
       input: zod.object({
         row: zod.number(),
         col: zod.number(),
+        playerName: zod.string(),
       }),
       resolve({input}) {
-        const { row, col } = input;
+        const { row, col, playerName } = input;
 
         if (gameService == null) {
           throw new Error('Tried to reveal a cell when the game has not yet started');
         }
 
-        gameService.send({type: 'REVEAL_NEXT_CELL', row, col});
+        gameService.send({type: 'REVEAL_NEXT_CELL', row, col, playerName});
       }
     })
     .mutation('startGame', {

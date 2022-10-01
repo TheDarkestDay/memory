@@ -15,6 +15,7 @@ export type GameContext = GameStateConfig & {
 type TakeOneEvent = {
   row: number;
   col: number;
+  playerName: string;
 };
 
 export const createGameMachine = ({field, players}: GameStateConfig) => {
@@ -45,6 +46,12 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
         on: {
           REVEAL_NEXT_CELL: [
             {
+              cond: (context, event) => {
+                const { playerName } = event as unknown as TakeOneEvent;
+                const { currentPlayer } = context;
+    
+                return currentPlayer === playerName;
+              },
               target: 'cellRevealed',
               actions: [
                 assign<GameContext>((context, event) => {
@@ -64,6 +71,12 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
         on: {
           REVEAL_NEXT_CELL: [
             {
+              cond: (context, event) => {
+                const { playerName } = event as unknown as TakeOneEvent;
+                const { currentPlayer } = context;
+    
+                return currentPlayer === playerName;
+              },
               target: 'countingScore',
               actions: [
                 assign<GameContext>((context, event) => {
