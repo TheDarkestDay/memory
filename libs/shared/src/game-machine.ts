@@ -28,7 +28,7 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
 
   return createMachine({
     id: 'game',
-    initial: 'pending',
+    initial: 'playing',
     predictableActionArguments: true,
     schema: {
       context: {} as GameContext,
@@ -42,17 +42,32 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
       capturedCells: [],
     },
     states: {
-      pending: {
+      playing: {
+        invoke: {
+          id: 'checkScore',
+          src: () => {
+            return (callback) => {
+              const timeoutHandle = setTimeout(() => {
+                callback('CHECK_SCORE');
+              }, 1_500);
+
+              return () => clearTimeout(timeoutHandle);
+            };
+          }
+        },
         on: {
           REVEAL_NEXT_CELL: [
             {
               cond: (context, event) => {
-                const { playerName } = event as unknown as TakeOneEvent;
-                const { currentPlayer } = context;
+                const { playerName, row, col } = event as unknown as TakeOneEvent;
+                const { currentPlayer, revealedCells } = context;
+
+                const allVisibleCells = [...revealedCells, ...context.capturedCells];
+                const isRequestedCellVisible = allVisibleCells.some(([cellRow, cellCol]) => cellRow === row && cellCol === col);
     
-                return currentPlayer === playerName;
+                return !isRequestedCellVisible && currentPlayer === playerName && revealedCells.length < 2;
               },
-              target: 'cellRevealed',
+              target: 'playing',
               actions: [
                 assign<GameContext>((context, event) => {
                   const { row, col } = event as unknown as TakeOneEvent;
@@ -65,48 +80,10 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
               ]
             }
           ],
-        },
-      },
-      cellRevealed: {
-        on: {
-          REVEAL_NEXT_CELL: [
+          CHECK_SCORE: [
             {
-              cond: (context, event) => {
-                const { playerName } = event as unknown as TakeOneEvent;
-                const { currentPlayer } = context;
-    
-                return currentPlayer === playerName;
-              },
-              target: 'countingScore',
-              actions: [
-                assign<GameContext>((context, event) => {
-                  const { row, col } = event as unknown as TakeOneEvent;
-    
-                  return {
-                    ...context,
-                    revealedCells: [...context.revealedCells, [row, col]],
-                  };
-                })
-              ]
-            }
-          ]
-        }
-      },
-      countingScore: {
-        invoke: {
-          id: 'passTurnToNextPlayer',
-          src: () => {
-            return (callback) => {
-              setTimeout(() => {
-                callback('PASS_TURN_TO_NEXT_PLAYER');
-              }, 1_500);
-            };
-          }
-        },
-        on: {
-          PASS_TURN_TO_NEXT_PLAYER: [
-            {
-              target: 'pending',
+              target: 'playing',
+              cond: (context) => context.revealedCells.length === 2,
               actions: assign<GameContext>((context) => {
                 const { players, field, scores, currentPlayer, capturedCells } = context;
                 const [[firstRevealedRow, firstRevealedCol], [secondRevealedRow, secondRevealedCol]] = context.revealedCells;
