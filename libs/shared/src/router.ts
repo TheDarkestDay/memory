@@ -36,13 +36,6 @@ const characters = [
 const DEFAULT_FIELD_SIZE = 4;
 
 const players: string[] = [];
-let gameField: string[][] = [];
-
-type CellOpenedPayload = {
-  row: number;
-  col: number;
-  content: string;
-};
 
 const rootEmitter = new EventEmitter();
 
@@ -139,7 +132,7 @@ export const createRouterWithContext = <TContext>() => {
       resolve({input}) {
         const fieldSize = input.fieldSize;
 
-        gameField = [];
+        const gameField = [] as string[][];
         for (let j = 0; j < fieldSize; j++) {
           gameField.push([]);
         }
@@ -177,8 +170,8 @@ export const createRouterWithContext = <TContext>() => {
           field: gameField,
         });
 
-        gameService = interpret(gameMachine).onTransition((state) => {
-          rootEmitter.emit('gameStateChange', state.context);
+        gameService = interpret(gameMachine).onChange((context) => {
+          rootEmitter.emit('gameStateChange', context);
         });
 
         gameService.start();

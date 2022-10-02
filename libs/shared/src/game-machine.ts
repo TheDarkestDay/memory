@@ -99,7 +99,7 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
             return (callback) => {
               setTimeout(() => {
                 callback('PASS_TURN_TO_NEXT_PLAYER');
-              }, 3_000);
+              }, 1_500);
             };
           }
         },
