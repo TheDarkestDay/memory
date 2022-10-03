@@ -1,7 +1,7 @@
 import { GameUiState } from '@memory/shared';
 import { useState } from 'react';
 import { GameField } from './game-field';
-import { trpc } from './trpc';
+import { trpc } from '../trpc';
 
 type Props = {
   playerName: string;

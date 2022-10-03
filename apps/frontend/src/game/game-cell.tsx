@@ -1,5 +1,5 @@
-import { useAppStore } from './store';
-import { trpc } from './trpc';
+import { useAppStore } from '../store';
+import { trpc } from '../trpc';
 
 type Props = {
   row: number;

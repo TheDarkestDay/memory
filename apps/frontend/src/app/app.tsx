@@ -1,11 +1,18 @@
-import { Game } from './game';
+import { RouterProvider, Route, createBrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { httpLink } from '@trpc/client/links/httpLink';
 import { createWSClient, wsLink } from '@trpc/client/links/wsLink';
 import { splitLink } from '@trpc/client/links/splitLink';
 
-import { trpc } from './trpc';
+import { GamePage } from '../game/game-page';
+import { trpc } from '../trpc';
 import { useState } from 'react';
+import { WizardPage } from '../wizard/wizard-page';
+
+const router = createBrowserRouter([
+  { path: '/', element: <WizardPage /> },
+  { path: '/game/:gameId', element: <GamePage /> }
+]);
 
 export const App = () => {
   const [wsClient] = useState(() => createWSClient({
@@ -35,7 +42,7 @@ export const App = () => {
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
-        <Game />
+        <RouterProvider router={router} />
       </QueryClientProvider>
     </trpc.Provider>
   )

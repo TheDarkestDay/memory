@@ -1,10 +1,13 @@
 import { ChangeEvent, FormEvent, useState } from 'react';
+import { useParams } from 'react-router-dom';
+
 import { GameLobby } from './game-lobby';
-import { useAppStore } from './store';
+import { useAppStore } from '../store';
+import { trpc } from '../trpc';
 
-import { trpc } from './trpc';
+export const GamePage = () => {
+  const { gameId } = useParams();
 
-export const Game = () => {
   const playerName = useAppStore((state) => state.playerName);
   const setPlayerName = useAppStore((state) => state.setPlayerName);
 
