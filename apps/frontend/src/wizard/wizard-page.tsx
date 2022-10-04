@@ -1,88 +1,136 @@
+import { css } from '@emotion/react';
+import { Button } from '../common/button';
+
+import { FlexRow, FlexItem } from '../layout';
+import { visuallyHidden } from '../utils';
+
+const styles = {
+  root: css({
+    display: 'flex',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'column',
+    backgroundColor: '#304859',
+  }),
+  title: css({
+    color: '#fcfcfc',
+    marginBottom: '78px',
+  }),
+  form: css({
+    backgroundColor: '#fcfcfc',
+    borderRadius: '20px',
+    padding: '56px',
+    minWidth: '40.625rem'
+  }),
+  fieldSet: css({
+    marginBottom: '33px',
+    border: 'none',
+  }),
+  fieldSetTitle: css({
+    color: '#7191a5',
+    fontSize: '20px',
+    fontWeight: 'bold',
+    marginBottom: '16px',
+  }),
+  createGameButton: css({
+    width: '100%'
+  }),
+  chip: css({
+    display: 'block',
+    textAlign: 'center',
+    backgroundColor: '#bcced9',
+    color: '#fcfcfc',
+    paddingTop: '10px',
+    paddingBottom: '10px',
+    borderRadius: '26px',
+    fontSize: '26px',
+    fontWeight: 'bold',
+    'input:checked + &': {
+      backgroundColor: '#304859',
+    }
+  })
+};
+
 export const WizardPage = () => {
   return (
-    <main>
-      <h1>
-        memory
-      </h1>
+    <main css={styles.root}>
+      <h1 css={styles.title}>memory</h1>
 
-      <form>
-        <fieldset>
-          <legend>
-            Select Theme
-          </legend>
+      <form css={styles.form}>
+        <fieldset css={styles.fieldSet}>
+          <legend css={styles.fieldSetTitle}>Select Theme</legend>
 
-          <div>
-            <label htmlFor="theme-numbers">
-              Numbers
-            </label>
-            <input id="theme-numbers" type="radio" name="theme" value="numbers" />
-          </div>
+          <FlexRow gap="1.875rem">
+            <FlexItem>
+              <input
+                css={visuallyHidden}
+                id="theme-numbers"
+                type="radio"
+                name="theme"
+                value="numbers"
+              />
+              <label css={styles.chip} htmlFor="theme-numbers">Numbers</label>
+            </FlexItem>
 
-          <div>
-            <label htmlFor="theme-emojis">
-              Emojis
-            </label>
-            <input id="theme-emojis" type="radio" name="theme" value="emojis" />
-          </div>
+            <FlexItem>
+              <input
+                css={visuallyHidden}
+                id="theme-emojis"
+                type="radio"
+                name="theme"
+                value="emojis"
+              />
+              <label css={styles.chip} htmlFor="theme-emojis">Emojis</label>
+            </FlexItem>
+          </FlexRow>
         </fieldset>
 
-        <fieldset>
-          <legend>
-            Number of Players
-          </legend>
+        <fieldset css={styles.fieldSet}>
+          <legend css={styles.fieldSetTitle}>Number of Players</legend>
 
-          <div>
-            <label htmlFor="players-one">
-              1
-            </label>
-            <input id="players-one" type="radio" name="players" value="1" />
-          </div>
+          <FlexRow gap="1.375rem">
+            <FlexItem>
+              <input id="players-one" css={visuallyHidden} type="radio" name="players" value="1" />
+              <label css={styles.chip} htmlFor="players-one">1</label>
+            </FlexItem>
 
-          <div>
-            <label htmlFor="players-two">
-              2
-            </label>
-            <input id="players-two" type="radio" name="players" value="2" />
-          </div>
+            <FlexItem>
+              <input id="players-two" css={visuallyHidden} type="radio" name="players" value="2" />
+              <label css={styles.chip} htmlFor="players-two">2</label>
+            </FlexItem>
 
-          <div>
-            <label htmlFor="players-three">
-              3
-            </label>
-            <input id="players-three" type="radio" name="players" value="3" />
-          </div>
+            <FlexItem>
+              <input id="players-three" css={visuallyHidden} type="radio" name="players" value="3" />
+              <label css={styles.chip} htmlFor="players-three">3</label>
+            </FlexItem>
 
-          <div>
-            <label htmlFor="players-four">
-              4
-            </label>
-            <input id="players-four" type="radio" name="players" value="4" />
-          </div>
+            <FlexItem>
+              <input id="players-four" css={visuallyHidden} type="radio" name="players" value="4" />
+              <label css={styles.chip} htmlFor="players-four">4</label>
+            </FlexItem>
+          </FlexRow>
         </fieldset>
 
-        <fieldset>
-          <legend>
-            Grid Size
-          </legend>
+        <fieldset css={styles.fieldSet}>
+          <legend css={styles.fieldSetTitle}>Grid Size</legend>
 
-          <div>
-            <label htmlFor="size-small">
-              4x4
-            </label>
-            <input id="size-small" type="radio" name="size" value="4" />
-          </div>
+          <FlexRow gap="1.875rem">
+            <FlexItem>
+              <input id="size-small" css={visuallyHidden} type="radio" name="size" value="4" />
+              <label css={styles.chip} htmlFor="size-small">4x4</label>
+            </FlexItem>
 
-          <div>
-            <label htmlFor="size-medium">
-              6x6
-            </label>
-            <input id="size-medium" type="radio" name="size" value="6" />
-          </div>
+            <FlexItem>
+              <input id="size-medium" css={visuallyHidden} type="radio" name="size" value="6" />
+              <label css={styles.chip} htmlFor="size-medium">6x6</label>
+            </FlexItem>
+          </FlexRow>
         </fieldset>
 
-        <button type="submit">
+        <Button styles={styles.createGameButton} type="submit">
           Create Game
-        </button>
+        </Button>
       </form>
     </main>
   );
