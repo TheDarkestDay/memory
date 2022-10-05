@@ -6,6 +6,7 @@ import { interpret, InterpreterFrom } from 'xstate';
 import { createGameMachine, GameContext } from './game-machine';
 import { shuffleArray } from './utils';
 import { GameUiState, getGameUiStateFromContext } from './game-ui-state';
+import { GameManager } from './game-manager';
 
 const characters = [
   '❤️', 
@@ -41,7 +42,7 @@ const rootEmitter = new EventEmitter();
 
 let gameService: InterpreterFrom<ReturnType<typeof createGameMachine>> | null = null;
 
-export const createRouterWithContext = <TContext>() => {
+export const createRouterWithContext = <TContext>(gameManager: GameManager) => {
   return router<TContext>()
     .subscription('joinedPlayersChange', {
       input: zod.object({
@@ -95,6 +96,20 @@ export const createRouterWithContext = <TContext>() => {
             rootEmitter.off('gameStateChange', handleGameStateChange);
           };
         });
+      }
+    })
+    .mutation('createGame', {
+      input: zod.object({
+        theme: zod.enum(['numbers', 'emojis']),
+        fieldSize: zod.number(),
+        numberOfPlayers: zod.number(),
+      }),
+      async resolve({input}) {
+        const { theme, fieldSize, numberOfPlayers } = input;
+
+        const newGame = await gameManager.createNewGame({theme, fieldSize, numberOfPlayers});
+
+        return newGame.id;
       }
     })
     .mutation('joinGame', {

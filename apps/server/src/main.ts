@@ -5,6 +5,7 @@ import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import { createRouterWithContext } from '@memory/shared';
 
 import { Context } from './context';
+import { inMemoryGameManager } from './game/in-memory-game-manager';
 
 const PORT = 3001;
 
@@ -16,7 +17,9 @@ server.get('/hello', (_, response) => {
   response.send('Regular route works!');
 });
 
-const appRouter = createRouterWithContext<Context>();
+const appRouter = createRouterWithContext<Context>(
+  inMemoryGameManager
+);
 
 server.register(ws);
 

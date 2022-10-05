@@ -1,3 +1,4 @@
+import { Form } from 'react-router-dom';
 import { css } from '@emotion/react';
 import { Button } from '../common/button';
 
@@ -57,13 +58,14 @@ export const WizardPage = () => {
     <main css={styles.root}>
       <h1 css={styles.title}>memory</h1>
 
-      <form css={styles.form}>
+      <Form css={styles.form} method="post">
         <fieldset css={styles.fieldSet}>
           <legend css={styles.fieldSetTitle}>Select Theme</legend>
 
           <FlexRow gap="1.875rem">
             <FlexItem>
               <input
+                defaultChecked
                 css={visuallyHidden}
                 id="theme-numbers"
                 type="radio"
@@ -96,7 +98,7 @@ export const WizardPage = () => {
             </FlexItem>
 
             <FlexItem>
-              <input id="players-two" css={visuallyHidden} type="radio" name="players" value="2" />
+              <input id="players-two" defaultChecked css={visuallyHidden} type="radio" name="players" value="2" />
               <label css={styles.chip} htmlFor="players-two">2</label>
             </FlexItem>
 
@@ -117,7 +119,7 @@ export const WizardPage = () => {
 
           <FlexRow gap="1.875rem">
             <FlexItem>
-              <input id="size-small" css={visuallyHidden} type="radio" name="size" value="4" />
+              <input id="size-small" defaultChecked css={visuallyHidden} type="radio" name="size" value="4" />
               <label css={styles.chip} htmlFor="size-small">4x4</label>
             </FlexItem>
 
@@ -131,7 +133,7 @@ export const WizardPage = () => {
         <Button styles={styles.createGameButton} type="submit">
           Create Game
         </Button>
-      </form>
+      </Form>
     </main>
   );
 };
