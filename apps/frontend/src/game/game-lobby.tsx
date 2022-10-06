@@ -1,32 +1,37 @@
 import { GameUiState } from '@memory/shared';
+import { useParams } from 'react-router-dom';
 import { useState } from 'react';
+
 import { GameField } from './game-field';
 import { trpc } from '../trpc';
+import { useAppStore } from '../store';
 
-type Props = {
-  playerName: string;
-};
-
-export const GameLobby = ({playerName}: Props) => {
+export const GameLobby = () => {
+  const { gameId } = useParams();
+  const setPlayerName = useAppStore((store) => store.setPlayerName);
   const [players, setPlayers] = useState<string[]>([]);
   const [gameState, setGameState] = useState<GameUiState | null>(null);
 
   const startGame = trpc.useMutation('startGame');
 
-  trpc.useSubscription(['joinedPlayersChange', {playerName}], {
+  trpc.useSubscription(['joinedPlayersChange', {gameId}], {
     onNext(joinedPlayers) {
       setPlayers(joinedPlayers);
     },
   });
 
-  trpc.useSubscription(['gameStateChange'], {
-    onNext(newGameState: GameUiState) {
-      setGameState(newGameState);
+  trpc.useSubscription(['gameStateChange', {gameId}], {
+    onNext(newGameState: GameUiState | string | null) {
+      if (typeof newGameState === 'string') {
+        setPlayerName(newGameState);
+      } else {
+        setGameState(newGameState);
+      }
     }
   });
 
   const handleStartButtonClick = () => {
-    startGame.mutateAsync({fieldSize: 4});
+    startGame.mutateAsync({gameId});
   };
   
   return (

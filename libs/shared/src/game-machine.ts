@@ -64,7 +64,7 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
 
                 const allVisibleCells = [...revealedCells, ...context.capturedCells];
                 const isRequestedCellVisible = allVisibleCells.some(([cellRow, cellCol]) => cellRow === row && cellCol === col);
-    
+                
                 return !isRequestedCellVisible && currentPlayer === playerName && revealedCells.length < 2;
               },
               target: 'playing',
@@ -122,3 +122,5 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
     actions: {},
   });
 };
+
+export type GameMachine = ReturnType<typeof createGameMachine>;

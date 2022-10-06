@@ -1,10 +1,10 @@
 import { RouterProvider, createBrowserRouter, redirect } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { GameFormValues } from '@memory/shared';
 
 import { GamePage } from '../game/game-page';
 import { trpc, trpcClient } from '../trpc';
 import { WizardPage } from '../wizard/wizard-page';
-import { GameConfig } from '@memory/shared';
 
 const router = createBrowserRouter([
   { 
@@ -12,10 +12,10 @@ const router = createBrowserRouter([
     element: <WizardPage />, 
     action: async ({ request }) => {
       const formData = await request.formData();
-      const payload: GameConfig = {
+      const payload: GameFormValues = {
         fieldSize: Number(formData.get('fieldSize')),
-        numberOfPlayers: Number(formData.get('numberOfPlayers')),
-        theme: formData.get('theme') as GameConfig['theme'],
+        playersCount: Number(formData.get('playersCount')),
+        theme: formData.get('theme') as GameFormValues['theme'],
       };
 
       const gameId = await trpcClient.mutation('createGame', payload);
