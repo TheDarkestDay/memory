@@ -1,5 +1,5 @@
-import { useParams } from 'react-router-dom';
-import { useAppStore } from '../store';
+import { Player } from '@memory/shared';
+import { useLoaderData, useParams } from 'react-router-dom';
 import { trpc } from '../trpc';
 
 type Props = {
@@ -10,7 +10,7 @@ type Props = {
 
 export const GameCell = ({row, col, content}: Props) => {
   const { gameId } = useParams();
-  const playerName = useAppStore((state) => state.playerName);
+  const { name: playerName } = useLoaderData() as Player;
   const revealCell = trpc.useMutation('openCell');
 
   const handleCellButtonClick = () => {

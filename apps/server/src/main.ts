@@ -1,10 +1,11 @@
 import ws from '@fastify/websocket'
 import fastify from 'fastify';
 import cors from '@fastify/cors';
+import cookie from '@fastify/cookie';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import { createRouterWithContext } from '@memory/shared';
 
-import { Context } from './context';
+import { Context, createContext } from './context';
 import { inMemoryGameManager } from './game/in-memory-game-manager';
 
 const PORT = 3001;
@@ -13,8 +14,8 @@ const server = fastify({
   maxParamLength: 5000,
 });
 
-server.get('/hello', (_, response) => {
-  response.send('Regular route works!');
+server.register(cookie, {
+  secret: 'secret',
 });
 
 const appRouter = createRouterWithContext<Context>(
@@ -26,7 +27,7 @@ server.register(ws);
 server.register(fastifyTRPCPlugin, {
   useWSS: true,
   prefix: '/trpc',
-  trpcOptions: { router: appRouter },
+  trpcOptions: { router: appRouter, createContext },
 });
 
 (async () => {

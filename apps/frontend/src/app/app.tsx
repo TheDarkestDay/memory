@@ -1,4 +1,4 @@
-import { RouterProvider, createBrowserRouter, redirect } from 'react-router-dom';
+import { RouterProvider, createBrowserRouter, redirect, json } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { GameFormValues } from '@memory/shared';
 
@@ -23,7 +23,25 @@ const router = createBrowserRouter([
       return redirect(`/game/${gameId}`);
     } 
   },
-  { path: '/game/:gameId', element: <GamePage /> },
+  { path: '/game/:gameId', 
+    loader: async ({ params }) => {
+      const { gameId } = params;
+
+      if (gameId == null) {
+        throw new Error('Failed to proceed to /game/:gameId path - gameId is missing');
+      }
+
+      const player = await trpcClient.mutation('joinGame', { gameId });
+
+      return json(
+        player,
+        {
+          status: 200
+        }
+      );
+    },
+    element: <GamePage /> 
+  },
 ]);
 
 const queryClient = new QueryClient();

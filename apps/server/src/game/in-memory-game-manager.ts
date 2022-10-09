@@ -1,5 +1,5 @@
-import { randomUUID } from 'crypto';
-import { GameManager, Game, shuffleArray, createGameMachine, GameContext, GameFormValues, GameEvent, GameEventsMap, GameEventsPayloadMap } from '@memory/shared';
+import { randomUUID, randomBytes } from 'crypto';
+import { GameManager, Game, shuffleArray, createGameMachine, GameContext, GameFormValues, GameEvent, GameEventsMap, GameEventsPayloadMap, Player } from '@memory/shared';
 import { interpret } from 'xstate';
 import { uniqueNamesGenerator, adjectives, animals } from 'unique-names-generator';
 
@@ -82,13 +82,34 @@ export class InMemoryGameManager implements GameManager {
       separator: ' ',
     });
 
-    targetGame.players.push(playerName);
+    const newPlayer = {
+      id: randomBytes(8).toString('hex'),
+      name: playerName
+    };
+
+    targetGame.players.push(newPlayer);
 
     this.emit(gameId, 'playersListChange', targetGame.players);
 
-    return {
-      name: playerName
-    };
+    return newPlayer;
+  }
+
+  async getPlayerById(gameId: string, id: string): Promise<Player> {
+    const targetGame = this.games.find((game) => game.id === gameId);
+
+    if (targetGame == null) {
+      throw new Error(`Failed to get player for game with id ${gameId} because it does not exist`);
+    }
+
+    const { players } = targetGame;
+
+    const player = players.find((player) => player.id === id);
+
+    if (player == null) {
+      throw new Error(`Failed to get player for game with id ${gameId} because it does not exist`);
+    }
+
+    return player;
   }
 
   removePlayer(gameId: string, playerName: string): void {
@@ -100,7 +121,7 @@ export class InMemoryGameManager implements GameManager {
 
     const { players } = targetGame;
 
-    const playerToRemoveIndex = players.indexOf(playerName);
+    const playerToRemoveIndex = players.findIndex((player) => player.name === playerName);
 
     if (playerToRemoveIndex !== -1) {
       players.splice(playerToRemoveIndex, 1);
@@ -109,7 +130,7 @@ export class InMemoryGameManager implements GameManager {
     this.emit(gameId, 'playersListChange', players);
   }
 
-  getPlayersList(gameId: string): string[] {
+  getPlayersList(gameId: string): Player[] {
     const targetGame = this.games.find(game => game.id === gameId);
 
     if (targetGame == null) {
@@ -231,7 +252,7 @@ export class InMemoryGameManager implements GameManager {
     }
 
     return createGameMachine({
-      players,
+      players: players.map((player) => player.name),
       field: gameField,
     });
   }

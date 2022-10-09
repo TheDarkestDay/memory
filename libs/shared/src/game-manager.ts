@@ -14,20 +14,21 @@ export type GameEvent = 'gameStateChange' | 'playersListChange';
 
 export type GameEventsPayloadMap = {
   gameStateChange: GameContext;
-  playersListChange: string[];
+  playersListChange: Player[];
 };
 
 export type GameEventsMap = {
   'gameStateChange': (context: GameContext) => void;
-  'playersListChange': (players: string[]) => void;
+  'playersListChange': (players: Player[]) => void;
 };
 
 export interface GameManager {
+  getPlayerById(gameId: string, id: string): Promise<Player>;
   createNewGame(config: GameFormValues): Promise<Game>;
   startGame(gameId: string): void;
   addPlayer(gameId: string): Player;
   removePlayer(gameId: string, playerName: string): void;
-  getPlayersList(gameId: string): string[];
+  getPlayersList(gameId: string): Player[];
   getGameContext(gameId: string): GameContext;
   isGameStarted(gameId: string): boolean;
   revealCell(gameId: string, row: number, col: number, playerName: string): void;
@@ -36,13 +37,14 @@ export interface GameManager {
 }
 
 export type Player = {
-  name: string
+  id: string;
+  name: string;
 };
 
 export type Game = {
   id: string;
   service: InterpreterFrom<GameMachine>;
-  players: string[];
+  players: Player[];
   fieldSize: number;
   theme: GameTheme;
 };

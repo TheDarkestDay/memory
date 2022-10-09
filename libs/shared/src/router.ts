@@ -3,9 +3,10 @@ import * as zod from 'zod';
 
 import { GameContext } from './game-machine';
 import { GameUiState, getGameUiStateFromContext } from './game-ui-state';
-import { GameManager } from './game-manager';
+import { GameManager, Player } from './game-manager';
+import { WebServerContext } from './web-server-context';
 
-export const createRouterWithContext = <TContext>(gameManager: GameManager) => {
+export const createRouterWithContext = <TContext extends WebServerContext>(gameManager: GameManager) => {
   return router<TContext>()
     .subscription('joinedPlayersChange', {
       input: zod.object({
@@ -18,8 +19,8 @@ export const createRouterWithContext = <TContext>(gameManager: GameManager) => {
           throw new Error('Failed to subscribe to joinedPlayersChange because gameId is not provided');
         }
 
-        return new Subscription<string[]>((emit) => {
-          const handleConnectedPlayersChange = (players: string[]) => {
+        return new Subscription<Player[]>((emit) => {
+          const handleConnectedPlayersChange = (players: Player[]) => {
             emit.data(players);
           };
 
@@ -39,23 +40,27 @@ export const createRouterWithContext = <TContext>(gameManager: GameManager) => {
       input: zod.object({
         gameId: zod.string().optional(),
       }),
-      resolve({input}) {
+      async resolve({input, ctx}) {
         const { gameId } = input;
 
         if (gameId == null) {
           throw new Error('Failed to subscribe to gameStateChange because gameId is not provided');
         }
 
-        const player = gameManager.addPlayer(gameId);
+        const { playerId } = ctx;
 
-        return new Subscription<string | GameUiState | null>((emit) => {
+        if (playerId == null) {
+          throw new Error('Failed to subscribe to gameStateChange because playerId is not provided');
+        }
+
+        const player = await gameManager.getPlayerById(gameId, playerId);
+        
+        return new Subscription<GameUiState | null>((emit) => {
           const handleGameStateChange = (context: GameContext) => {
             emit.data(
               getGameUiStateFromContext(context)
             );
           };
-
-          emit.data(player.name);
 
           if (!gameManager.isGameStarted(gameId)) {
             emit.data(null);
@@ -71,6 +76,25 @@ export const createRouterWithContext = <TContext>(gameManager: GameManager) => {
             gameManager.removePlayer(gameId, player.name);
           };
         });
+      }
+    })
+    .mutation('joinGame', {
+      input: zod.object({
+        gameId: zod.string()
+      }),
+      resolve({input, ctx}) {
+        const { gameId } = input;
+        const { playerId } = ctx;
+
+        if (playerId == null) {
+          const newPlayer = gameManager.addPlayer(gameId);
+
+          ctx.setCookie('playerId', newPlayer.id);
+
+          return newPlayer;
+        }
+
+        return gameManager.getPlayerById(gameId, playerId);
       }
     })
     .mutation('createGame', {

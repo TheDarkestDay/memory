@@ -1,15 +1,13 @@
-import { GameUiState } from '@memory/shared';
+import { GameUiState, Player } from '@memory/shared';
 import { useParams } from 'react-router-dom';
 import { useState } from 'react';
 
 import { GameField } from './game-field';
 import { trpc } from '../trpc';
-import { useAppStore } from '../store';
 
 export const GameLobby = () => {
   const { gameId } = useParams();
-  const setPlayerName = useAppStore((store) => store.setPlayerName);
-  const [players, setPlayers] = useState<string[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
   const [gameState, setGameState] = useState<GameUiState | null>(null);
 
   const startGame = trpc.useMutation('startGame');
@@ -21,12 +19,8 @@ export const GameLobby = () => {
   });
 
   trpc.useSubscription(['gameStateChange', {gameId}], {
-    onNext(newGameState: GameUiState | string | null) {
-      if (typeof newGameState === 'string') {
-        setPlayerName(newGameState);
-      } else {
-        setGameState(newGameState);
-      }
+    onNext(newGameState) {
+      setGameState(newGameState);
     }
   });
 
@@ -41,7 +35,7 @@ export const GameLobby = () => {
       </h2>
 
       <ul>
-        {players.map((player) => <li key={player}>{player}</li>)}
+        {players.map(({id, name}) => <li key={id}>{name}</li>)}
       </ul>
 
       <button onClick={handleStartButtonClick}>
