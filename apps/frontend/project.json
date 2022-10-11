@@ -48,6 +48,11 @@
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "frontend:build",
+        "host": "local.thedarkestday-memory.com",
+        "ssl": true,
+        "proxyConfig": "./apps/frontend/proxy.conf.json",
+        "sslKey": "./apps/frontend/certs/local.thedarkestday-memory.com-key.pem",
+        "sslCert": "./apps/frontend/certs/local.thedarkestday-memory.com.pem",
         "hmr": true
       },
       "configurations": {

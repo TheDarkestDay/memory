@@ -6,9 +6,9 @@ import { AppRouter } from '@memory/shared';
 
 export const trpc = createReactQueryHooks<AppRouter>();
 
-// const wsClient = createWSClient({
-//   url: 'ws://localhost:3001/trpc',
-// });
+const wsClient = createWSClient({
+  url: 'ws://localhost:3001/trpc',
+});
 
 export const trpcClient = trpc.createClient({
   links: [
@@ -16,14 +16,11 @@ export const trpcClient = trpc.createClient({
       condition(op) {
         return op.type === 'subscription';
       },
-      // left: wsLink({
-      //   client: wsClient,
-      // }),
-      left: httpLink({
-        url: 'http://localhost:3001/trpc',
+      left: wsLink({
+        client: wsClient,
       }),
       right: httpLink({
-        url: 'http://localhost:3001/trpc',
+        url: '/trpc',
       }),
     })
   ]

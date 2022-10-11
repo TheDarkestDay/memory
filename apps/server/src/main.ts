@@ -14,9 +14,7 @@ const server = fastify({
   maxParamLength: 5000,
 });
 
-server.register(cookie, {
-  secret: 'secret',
-});
+server.register(cookie);
 
 const appRouter = createRouterWithContext<Context>(
   inMemoryGameManager
@@ -31,7 +29,9 @@ server.register(fastifyTRPCPlugin, {
 });
 
 (async () => {
-  await server.register(cors);
+  await server.register(cors, {
+    origin: 'https://local.thedarkestday-memory.com:4200'
+  });
 
   try {
     await server.listen({ port: PORT });
