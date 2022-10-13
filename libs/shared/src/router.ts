@@ -10,14 +10,10 @@ export const createRouterWithContext = <TContext extends WebServerContext>(gameM
   return router<TContext>()
     .subscription('joinedPlayersChange', {
       input: zod.object({
-        gameId: zod.string().optional(),
+        gameId: zod.string(),
       }),
       resolve({input}) {
         const { gameId } = input;
-
-        if (gameId == null) {
-          throw new Error('Failed to subscribe to joinedPlayersChange because gameId is not provided');
-        }
 
         return new Subscription<Player[]>((emit) => {
           const handleConnectedPlayersChange = (players: Player[]) => {
@@ -38,22 +34,10 @@ export const createRouterWithContext = <TContext extends WebServerContext>(gameM
     })
     .subscription('gameStateChange', {
       input: zod.object({
-        gameId: zod.string().optional(),
+        gameId: zod.string(),
       }),
-      async resolve({input, ctx}) {
+      async resolve({input}) {
         const { gameId } = input;
-
-        if (gameId == null) {
-          throw new Error('Failed to subscribe to gameStateChange because gameId is not provided');
-        }
-
-        const { playerId } = ctx;
-
-        if (playerId == null) {
-          throw new Error('Failed to subscribe to gameStateChange because playerId is not provided');
-        }
-
-        const player = await gameManager.getPlayerById(gameId, playerId);
         
         return new Subscription<GameUiState | null>((emit) => {
           const handleGameStateChange = (context: GameContext) => {
@@ -72,8 +56,6 @@ export const createRouterWithContext = <TContext extends WebServerContext>(gameM
 
           return () => {
             gameManager.off(gameId, 'gameStateChange', handleGameStateChange);
-
-            gameManager.removePlayer(gameId, player.name);
           };
         });
       }
@@ -86,7 +68,7 @@ export const createRouterWithContext = <TContext extends WebServerContext>(gameM
         const { gameId } = input;
         const { playerId } = ctx;
 
-        if (playerId == null) {
+        if (playerId == null || !gameManager.isPlayerIdValid(playerId)) {
           const newPlayer = gameManager.addPlayer(gameId);
 
           ctx.setCookie('playerId', newPlayer.id);
@@ -113,17 +95,23 @@ export const createRouterWithContext = <TContext extends WebServerContext>(gameM
     })
     .mutation('openCell', {
       input: zod.object({
-        gameId: zod.string().optional(),
+        gameId: zod.string(),
         row: zod.number(),
         col: zod.number(),
         playerName: zod.string(),
       }),
-      resolve({input}) {
-        const { gameId, row, col, playerName } = input;
+      async resolve({input, ctx}) {
+        const { playerId } = ctx;
 
-        if (gameId == null) {
-          throw new Error('Failed to reveal cell because gameId is not provided');
+        if (playerId == null) {
+          throw new Error(`Failed to open a cell: player id is not set`);
         }
+
+        if (!gameManager.isPlayerIdValid(playerId)) {
+          throw new Error(`Failed to open a cell: player id is invalid`);
+        }
+
+        const { gameId, row, col, playerName } = input;
 
         gameManager.revealCell(gameId, row, col, playerName);;
       }

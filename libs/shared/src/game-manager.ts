@@ -31,6 +31,7 @@ export interface GameManager {
   getPlayersList(gameId: string): Player[];
   getGameContext(gameId: string): GameContext;
   isGameStarted(gameId: string): boolean;
+  isPlayerIdValid(playerId: string): boolean;
   revealCell(gameId: string, row: number, col: number, playerName: string): void;
   on(gameId: string, event: GameEvent, listener: GameEventsMap[GameEvent]): void;
   off(gameId: string, event: GameEvent, listener: GameEventsMap[GameEvent]): void;

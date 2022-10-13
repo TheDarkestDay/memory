@@ -1,3 +1,4 @@
+import { readFileSync } from 'fs';
 import ws from '@fastify/websocket'
 import fastify from 'fastify';
 import cors from '@fastify/cors';
@@ -12,6 +13,10 @@ const PORT = 3001;
 
 const server = fastify({
   maxParamLength: 5000,
+  https: {
+    key: readFileSync('./apps/server/certs/local-server.thedarkestday-memory.com-key.pem'),
+    cert: readFileSync('./apps/server/certs/local-server.thedarkestday-memory.com.pem'),
+  }
 });
 
 server.register(cookie);

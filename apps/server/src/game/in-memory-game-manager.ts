@@ -112,6 +112,14 @@ export class InMemoryGameManager implements GameManager {
     return player;
   }
 
+  isPlayerIdValid(playerId: string): boolean {
+    return this.games.some(
+      (game) => game.players.some(
+        (player) => player.id === playerId
+      )
+    );
+  }
+
   removePlayer(gameId: string, playerName: string): void {
     const targetGame = this.games.find(game => game.id === gameId);
 

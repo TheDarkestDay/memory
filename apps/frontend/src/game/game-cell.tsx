@@ -13,6 +13,10 @@ export const GameCell = ({row, col, content}: Props) => {
   const { name: playerName } = useLoaderData() as Player;
   const revealCell = trpc.useMutation('openCell');
 
+  if (gameId == null) {
+    throw new Error('Failed to proceed to /game/:gameId path - gameId is missing');
+  }
+
   const handleCellButtonClick = () => {
     revealCell.mutateAsync({gameId, row, col, playerName});
   }

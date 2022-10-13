@@ -130,7 +130,7 @@ export const WizardPage = () => {
           </FlexRow>
         </fieldset>
 
-        <Button styles={styles.createGameButton} type="submit">
+        <Button variant="primary" size="lg" styles={styles.createGameButton} type="submit">
           Create Game
         </Button>
       </Form>

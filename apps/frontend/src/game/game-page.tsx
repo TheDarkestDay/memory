@@ -1,11 +1,70 @@
-import { GameLobby } from './game-lobby';
+import { css } from '@emotion/react';
+import { GameUiState } from '@memory/shared';
+import { useState } from 'react';
+import { useParams } from 'react-router-dom';
+
+import { Button } from '../common/button';
+import { FlexRow } from '../layout';
+import { trpc } from '../trpc';
+import { GameField } from './game-field';
+import { PlayersList } from './players-list';
+
+const styles = {
+  logo: css({
+    color: '#152938',
+  }),
+  main: css({
+    padding: '2.5rem 5rem'
+  }),
+  controls: css({
+    marginLeft: 'auto'
+  })
+};
+
+type PageParams = {
+  gameId: string;
+}
 
 export const GamePage = () => {
-  return (
-    <main>
-      <h1>Memory</h1>
+  const { gameId = '' } = useParams<PageParams>();
 
-      <GameLobby />
+  const [gameState, setGameState] = useState<GameUiState | null>(null);
+
+  trpc.useSubscription(['gameStateChange', {gameId}], {
+    onNext(newGameState) {
+      setGameState(newGameState);
+    }
+  });
+
+  const startGame = trpc.useMutation('startGame');
+
+  const handleStartButtonClick = () => {
+    startGame.mutateAsync({gameId});
+  };
+
+  return (
+    <main css={styles.main}>
+      <FlexRow>
+        <h1>
+          memory
+        </h1>
+
+        <FlexRow gap="1rem" styles={styles.controls}>
+          <Button onClick={handleStartButtonClick} variant="primary">
+            Start
+          </Button>
+
+          <Button variant="secondary">
+            New Game
+          </Button>
+        </FlexRow>
+      </FlexRow>
+
+      <section>
+        {gameState && <GameField state={gameState} />}
+      </section>
+
+      <PlayersList activePlayerName={gameState?.currentPlayer} scores={gameState?.scores} />
     </main>
   );
 };
