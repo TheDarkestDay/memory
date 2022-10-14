@@ -7,6 +7,9 @@
     "build": "nx build",
     "test": "nx test"
   },
+  "engines": {
+    "node": "^16.0.0"
+  },
   "private": true,
   "dependencies": {
     "@emotion/react": "11.10.4",
