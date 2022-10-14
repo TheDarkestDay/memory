@@ -14,7 +14,14 @@ const styles = {
     color: '#152938',
   }),
   main: css({
+    minHeight: '100%',
+    display: 'flex',
+    flexDirection: 'column',
     padding: '2.5rem 5rem'
+  }),
+  fieldSection: css({
+    flexGrow: 1,
+    marginBottom: '6rem'
   }),
   controls: css({
     marginLeft: 'auto'
@@ -54,13 +61,13 @@ export const GamePage = () => {
             Start
           </Button>
 
-          <Button variant="secondary">
+          <Button to="/" variant="secondary">
             New Game
           </Button>
         </FlexRow>
       </FlexRow>
 
-      <section>
+      <section css={styles.fieldSection}>
         {gameState && <GameField state={gameState} />}
       </section>
 

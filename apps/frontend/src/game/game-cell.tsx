@@ -1,14 +1,26 @@
 import { Player } from '@memory/shared';
 import { useLoaderData, useParams } from 'react-router-dom';
+import { css } from '@emotion/react';
+
 import { trpc } from '../trpc';
 
 type Props = {
   row: number;
   col: number;
   content: string;
+  isRevealed: boolean;
 };
 
-export const GameCell = ({row, col, content}: Props) => {
+const styles = {
+  root: css({
+    fontSize: '44px',
+    borderRadius: '100%',
+    border: 'none',
+    backgroundColor: '#bcced9'
+  })
+};
+
+export const GameCell = ({row, col, content, isRevealed}: Props) => {
   const { gameId } = useParams();
   const { name: playerName } = useLoaderData() as Player;
   const revealCell = trpc.useMutation('openCell');
@@ -21,9 +33,22 @@ export const GameCell = ({row, col, content}: Props) => {
     revealCell.mutateAsync({gameId, row, col, playerName});
   }
 
+  const rootStyles = css(
+    styles.root,
+    content === '❓' && {
+      backgroundColor: '#304859',
+      ':hover': {
+        backgroundColor: '#6395b8',
+      }
+    },
+    isRevealed && {
+      backgroundColor: '#fda214',
+    }
+  );
+
   return (
-    <button onClick={handleCellButtonClick}>
-      {content}
+    <button css={rootStyles} onClick={handleCellButtonClick}>
+      {content === '❓' ? '' : content}
     </button>
   );
 };

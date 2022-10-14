@@ -11,21 +11,29 @@ const styles = {
     marginBlockStart: 0,
     marginBlockEnd: 0,
     paddingInlineStart: 0,
-    listStyleType: 'none'
+    listStyleType: 'none',
   }),
   player: css({
     minWidth: '15rem',
     padding: '1.5rem 1rem',
     backgroundColor: '#dfe7ec',
-    color: '#7191a5'
+    '--name-color': '#7191a5',
+    '--score-color': '#304859',
+  }),
+  activePlayer: css({
+    backgroundColor: '#fda214',
+    '--name-color': '#fcfcfc',
+    '--score-color': '#fcfcfc',
   }),
   name: css({
+    color: 'var(--name-color)',
     fontSize: '1.25rem',
+    fontWeight: 'bold',
   }),
   score: css({
-    color: '#304859',
-    fontSize: '2rem'
-  })
+    color: 'var(--score-color)',
+    fontSize: '2rem',
+  }),
 };
 
 type Props = {
@@ -33,11 +41,11 @@ type Props = {
   scores?: Record<string, number>;
 };
 
-export const PlayersList = ({activePlayerName, scores = {}}: Props) => {
+export const PlayersList = ({ activePlayerName, scores = {} }: Props) => {
   const { gameId = '' } = useParams();
   const [players, setPlayers] = useState<Player[]>([]);
 
-  trpc.useSubscription(['joinedPlayersChange', {gameId}], {
+  trpc.useSubscription(['joinedPlayersChange', { gameId }], {
     onNext(joinedPlayers) {
       setPlayers(joinedPlayers);
     },
@@ -45,14 +53,24 @@ export const PlayersList = ({activePlayerName, scores = {}}: Props) => {
 
   return (
     <FlexRow component="ul" styles={styles.root} gap="1.75rem">
-      {
-        players.map((player) => (
-          <FlexRow component="li" key={player.id} justifyContent='space-between' styles={styles.player}>
+      {players.map((player) => {
+        const playerStyles = css(
+          styles.player,
+          player.name === activePlayerName && styles.activePlayer
+        );
+
+        return (
+          <FlexRow
+            component="li"
+            key={player.id}
+            justifyContent="space-between"
+            styles={playerStyles}
+          >
             <span css={styles.name}>{player.name}</span>
             <span css={styles.score}>{scores[player.name] ?? 0}</span>
           </FlexRow>
-        ))
-      }
+        );
+      })}
     </FlexRow>
   );
 };

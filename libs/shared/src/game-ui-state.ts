@@ -2,6 +2,7 @@ import { GameContext } from './game-machine';
 
 export type GameUiState = {
   field: string[][];
+  cellsRevealedThisTurn: [number, number][];
   currentPlayer: string;
   scores: Record<string, number>;
   players: string[];
@@ -26,6 +27,7 @@ export const getGameUiStateFromContext = (context: GameContext): GameUiState => 
 
   return {
     field: fieldToRender,
+    cellsRevealedThisTurn: revealedCells,
     currentPlayer,
     scores,
     players
