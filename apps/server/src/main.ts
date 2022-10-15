@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import ws from '@fastify/websocket'
+import ws from '@fastify/websocket';
 import fastify from 'fastify';
 import cors from '@fastify/cors';
 import cookie from '@fastify/cookie';
@@ -11,19 +11,27 @@ import { inMemoryGameManager } from './game/in-memory-game-manager';
 
 const PORT = 3001;
 
+let httpsConfig;
+
+if (process.env.NODE_ENV === 'development') {
+  httpsConfig = {
+    key: readFileSync(
+      './apps/server/certs/local-server.thedarkestday-memory.com-key.pem'
+    ),
+    cert: readFileSync(
+      './apps/server/certs/local-server.thedarkestday-memory.com.pem'
+    ),
+  };
+}
+
 const server = fastify({
   maxParamLength: 5000,
-  https: {
-    key: readFileSync('./apps/server/certs/local-server.thedarkestday-memory.com-key.pem'),
-    cert: readFileSync('./apps/server/certs/local-server.thedarkestday-memory.com.pem'),
-  }
+  https: httpsConfig,
 });
 
 server.register(cookie);
 
-const appRouter = createRouterWithContext<Context>(
-  inMemoryGameManager
-);
+const appRouter = createRouterWithContext<Context>(inMemoryGameManager);
 
 server.register(ws);
 
@@ -35,7 +43,7 @@ server.register(fastifyTRPCPlugin, {
 
 (async () => {
   await server.register(cors, {
-    origin: 'https://local.thedarkestday-memory.com:4200'
+    origin: `https://${process.env.NX_FRONTEND_DOMAIN}`,
   });
 
   try {

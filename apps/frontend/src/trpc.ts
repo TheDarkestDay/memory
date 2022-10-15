@@ -7,8 +7,13 @@ import { AppRouter } from '@memory/shared';
 export const trpc = createReactQueryHooks<AppRouter>();
 
 const wsClient = createWSClient({
-  url: 'wss://local-server.thedarkestday-memory.com:3001/trpc',
+  url: `wss://${process.env.NX_SERVER_DOMAIN}/trpc`,
 });
+
+const trpcRootUrl =
+  process.env.NODE_ENV === 'production'
+    ? `https://${process.env.NX_SERVER_DOMAIN}/trpc`
+    : '/trpc';
 
 export const trpcClient = trpc.createClient({
   links: [
@@ -20,8 +25,8 @@ export const trpcClient = trpc.createClient({
         client: wsClient,
       }),
       right: httpLink({
-        url: '/trpc',
+        url: trpcRootUrl,
       }),
-    })
-  ]
+    }),
+  ],
 });

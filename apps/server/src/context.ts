@@ -10,7 +10,7 @@ export const createContext = async ({ req, res }: CreateFastifyContextOptions) =
       res.setCookie(name, value, {
         httpOnly: true,
         secure: true,
-        domain: 'thedarkestday-memory.com',
+        domain: process.env.NX_SET_COOKIE_DOMAIN,
         path: '/'
       });
     }
