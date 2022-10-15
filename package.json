@@ -4,8 +4,8 @@
   "license": "MIT",
   "scripts": {
     "start": "nx run-many --target=serve --projects=frontend,server --parallel",
-    "build:frontend": "nx build",
-    "build:server": "nx build --project=server",
+    "build:frontend": "nx build --production",
+    "build:server": "nx build --project=server --production",
     "test": "nx test"
   },
   "engines": {
