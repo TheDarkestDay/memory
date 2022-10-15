@@ -9,7 +9,7 @@ import { createRouterWithContext } from '@memory/shared';
 import { Context, createContext } from './context';
 import { inMemoryGameManager } from './game/in-memory-game-manager';
 
-const PORT = Number(process.env.PORT) || 3001;
+const PORT = Number(process.env.NX_SERVER_PORT) || 3001;
 
 let httpsConfig;
 
