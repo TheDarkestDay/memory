@@ -57,6 +57,10 @@ server.setErrorHandler((error) => {
     await server.register(staticFiles, {
       root: resolve('./dist/apps/frontend'),
     });
+
+    server.get('*', (_request, reply) => {
+      reply.sendFile('index.html');
+    });
   }
 
   try {
