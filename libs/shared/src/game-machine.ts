@@ -6,6 +6,7 @@ type GameStateConfig = {
 };
 
 export type GameContext = GameStateConfig & {
+  winner: string | null;
   scores: Record<string, number>;
   currentPlayer: string;
   revealedCells: [number, number][];
@@ -34,6 +35,7 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
       context: {} as GameContext,
     },
     context: {
+      winner: null,
       field,
       players,
       currentPlayer: players[0],

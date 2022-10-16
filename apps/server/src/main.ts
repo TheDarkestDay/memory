@@ -1,4 +1,4 @@
-import { join } from 'path';
+import { resolve } from 'path';
 import { readFileSync } from 'fs';
 import ws from '@fastify/websocket';
 import fastify from 'fastify';
@@ -55,7 +55,7 @@ server.setErrorHandler((error) => {
     });
   } else {
     await server.register(staticFiles, {
-      root: join('./dist/apps/frontend'),
+      root: resolve('./dist/apps/frontend'),
     });
   }
 
