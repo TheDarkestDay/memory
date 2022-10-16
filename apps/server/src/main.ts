@@ -41,6 +41,10 @@ server.register(fastifyTRPCPlugin, {
   trpcOptions: { router: appRouter, createContext },
 });
 
+server.get('/', () => {
+  return {status: 'OK'};
+});
+
 (async () => {
   await server.register(cors, {
     origin: `https://${process.env.NX_FRONTEND_DOMAIN}`,
