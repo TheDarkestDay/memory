@@ -13,6 +13,8 @@ const PORT = Number(process.env.NX_SERVER_PORT) || 3001;
 
 let httpsConfig;
 
+console.log(`NODE_ENV is ${process.env.NODE_ENV}`);
+
 if (process.env.NODE_ENV === 'development') {
   httpsConfig = {
     key: readFileSync(
