@@ -1,7 +1,9 @@
+import { join } from 'path';
 import { readFileSync } from 'fs';
 import ws from '@fastify/websocket';
 import fastify from 'fastify';
 import cors from '@fastify/cors';
+import staticFiles from '@fastify/static';
 import cookie from '@fastify/cookie';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import { createRouterWithContext } from '@memory/shared';
@@ -12,8 +14,6 @@ import { inMemoryGameManager } from './game/in-memory-game-manager';
 const PORT = Number(process.env.NX_SERVER_PORT) || 3001;
 
 let httpsConfig;
-
-console.log(`NODE_ENV is ${process.env.NODE_ENV}`);
 
 if (process.env.NODE_ENV === 'development') {
   httpsConfig = {
@@ -44,10 +44,6 @@ server.register(fastifyTRPCPlugin, {
   trpcOptions: { router: appRouter, createContext },
 });
 
-server.get('/', () => {
-  return {status: 'OK'};
-});
-
 server.setErrorHandler((error) => {
   server.log.error(error);
 });
@@ -56,6 +52,10 @@ server.setErrorHandler((error) => {
   if (process.env.NODE_ENV === 'development') {
     await server.register(cors, {
       origin: `https://${process.env.NX_FRONTEND_DOMAIN}`,
+    });
+  } else {
+    await server.register(staticFiles, {
+      root: join('./dist/apps/frontend'),
     });
   }
 

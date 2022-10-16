@@ -6,6 +6,7 @@
     "start": "nx run-many --target=serve --projects=frontend,server --parallel",
     "build:frontend": "nx build --production",
     "build:server": "./pre-deploy.sh && nx build --project=server --production",
+    "build": "./pre-deploy.sh && nx run-many --target=build --projects=frontend,server --parallel --production",
     "test": "nx test"
   },
   "engines": {
@@ -17,11 +18,12 @@
     "@emotion/styled": "11.10.4",
     "@fastify/cookie": "^8.3.0",
     "@fastify/cors": "^8.1.0",
+    "@fastify/static": "^6.5.0",
     "@fastify/websocket": "^7.0.1",
     "@trpc/react": "^9.27.2",
     "@trpc/server": "^9.27.2",
     "core-js": "^3.6.5",
-    "fastify": "^4.6.0",
+    "fastify": "^4.8.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-router-dom": "^6.4.1",
