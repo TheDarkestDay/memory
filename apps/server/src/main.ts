@@ -48,9 +48,11 @@ server.get('/', () => {
 });
 
 (async () => {
-  await server.register(cors, {
-    origin: `https://${process.env.NX_FRONTEND_DOMAIN}`,
-  });
+  if (process.env.NODE_ENV === 'development') {
+    await server.register(cors, {
+      origin: `https://${process.env.NX_FRONTEND_DOMAIN}`,
+    });
+  }
 
   try {
     await server.listen({ port: PORT, host: '0.0.0.0' });
