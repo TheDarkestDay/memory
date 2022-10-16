@@ -51,7 +51,7 @@ server.get('/', () => {
   });
 
   try {
-    await server.listen({ port: PORT });
+    await server.listen({ port: PORT, host: '0.0.0.0' });
     console.log(`Server listening on port ${PORT}`);
   } catch (err) {
     server.log.error(err);
