@@ -47,6 +47,10 @@ server.get('/', () => {
   return {status: 'OK'};
 });
 
+server.setErrorHandler((error) => {
+  server.log.error(error);
+});
+
 (async () => {
   if (process.env.NODE_ENV === 'development') {
     await server.register(cors, {
