@@ -56,6 +56,7 @@ server.setErrorHandler((error) => {
   } else {
     await server.register(staticFiles, {
       root: resolve('./dist/apps/frontend'),
+      wildcard: false,
     });
 
     server.get('*', (_request, reply) => {
