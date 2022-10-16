@@ -28,6 +28,7 @@ if (process.env.NODE_ENV === 'development') {
 
 const server = fastify({
   maxParamLength: 5000,
+  logger: true,
   https: httpsConfig,
 });
 
