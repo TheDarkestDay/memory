@@ -64,11 +64,11 @@ export const createRouterWithContext = <TContext extends WebServerContext>(gameM
       input: zod.object({
         gameId: zod.string()
       }),
-      resolve({input, ctx}) {
+      async resolve({input, ctx}) {
         const { gameId } = input;
         const { playerId } = ctx;
 
-        if (playerId == null || !gameManager.isPlayerIdValid(playerId)) {
+        if (playerId == null || !gameManager.isPlayerJoinedGame(gameId, playerId)) {
           const newPlayer = gameManager.addPlayer(gameId);
 
           ctx.setCookie('playerId', newPlayer.id);
@@ -101,17 +101,18 @@ export const createRouterWithContext = <TContext extends WebServerContext>(gameM
         playerName: zod.string(),
       }),
       async resolve({input, ctx}) {
+        const { gameId } = input;
         const { playerId } = ctx;
 
         if (playerId == null) {
           throw new Error(`Failed to open a cell: player id is not set`);
         }
 
-        if (!gameManager.isPlayerIdValid(playerId)) {
-          throw new Error(`Failed to open a cell: player id is invalid`);
+        if (!gameManager.isPlayerJoinedGame(gameId, playerId)) {
+          throw new Error(`Failed to open a cell: player with this id is not in the game`);
         }
 
-        const { gameId, row, col, playerName } = input;
+        const { row, col, playerName } = input;
 
         gameManager.revealCell(gameId, row, col, playerName);;
       }

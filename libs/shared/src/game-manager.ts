@@ -23,7 +23,7 @@ export type GameEventsMap = {
 };
 
 export interface GameManager {
-  getPlayerById(gameId: string, id: string): Promise<Player>;
+  getPlayerById(gameId: string, id: string): Promise<Player | null>;
   createNewGame(config: GameFormValues): Promise<Game>;
   startGame(gameId: string): void;
   restartGame(gameId: string): void;
@@ -32,7 +32,7 @@ export interface GameManager {
   getPlayersList(gameId: string): Player[];
   getGameData(gameId: string): GameData;
   isGameStarted(gameId: string): boolean;
-  isPlayerIdValid(playerId: string): boolean;
+  isPlayerJoinedGame(gameId: string, playerId: string): boolean;
   revealCell(gameId: string, row: number, col: number, playerName: string): void;
   on(gameId: string, event: GameEvent, listener: GameEventsMap[GameEvent]): void;
   off(gameId: string, event: GameEvent, listener: GameEventsMap[GameEvent]): void;

@@ -126,13 +126,13 @@ export class InMemoryGameManager implements GameManager {
     const player = players.find((player) => player.id === id);
 
     if (player == null) {
-      throw new Error(`Failed to get player for game with id ${gameId} because it does not exist`);
+      return null;
     }
 
     return player;
   }
 
-  isPlayerIdValid(playerId: string): boolean {
+  isPlayerJoinedGame(playerId: string): boolean {
     return this.games.some(
       (game) => game.players.some(
         (player) => player.id === playerId
