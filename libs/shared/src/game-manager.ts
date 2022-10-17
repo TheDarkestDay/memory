@@ -1,6 +1,6 @@
 import { InterpreterFrom } from 'xstate';
 
-import { GameContext, GameMachine } from './game-machine';
+import { GameData, GameMachine } from './game-machine';
 
 export type GameTheme = 'numbers' | 'emojis';
 
@@ -13,12 +13,12 @@ export type GameFormValues = {
 export type GameEvent = 'gameStateChange' | 'playersListChange';
 
 export type GameEventsPayloadMap = {
-  gameStateChange: GameContext;
+  gameStateChange: GameData;
   playersListChange: Player[];
 };
 
 export type GameEventsMap = {
-  'gameStateChange': (context: GameContext) => void;
+  'gameStateChange': (context: GameData) => void;
   'playersListChange': (players: Player[]) => void;
 };
 
@@ -26,10 +26,11 @@ export interface GameManager {
   getPlayerById(gameId: string, id: string): Promise<Player>;
   createNewGame(config: GameFormValues): Promise<Game>;
   startGame(gameId: string): void;
+  restartGame(gameId: string): void;
   addPlayer(gameId: string): Player;
   removePlayer(gameId: string, playerName: string): void;
   getPlayersList(gameId: string): Player[];
-  getGameContext(gameId: string): GameContext;
+  getGameData(gameId: string): GameData;
   isGameStarted(gameId: string): boolean;
   isPlayerIdValid(playerId: string): boolean;
   revealCell(gameId: string, row: number, col: number, playerName: string): void;

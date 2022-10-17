@@ -1,7 +1,7 @@
-import { GameContext } from './game-machine';
+import { GameData, GamePhase } from './game-machine';
 
 export type GameUiState = {
-  winner: string | null;
+  phase: GamePhase;
   field: string[][];
   cellsRevealedThisTurn: [number, number][];
   currentPlayer: string;
@@ -9,8 +9,8 @@ export type GameUiState = {
   players: string[];
 };
 
-export const getGameUiStateFromContext = (context: GameContext): GameUiState => {
-  const { field, winner, revealedCells, capturedCells, currentPlayer, scores, players } = context;
+export const getGameUiStateFromGameData = (context: GameData): GameUiState => {
+  const { field, phase, revealedCells, capturedCells, currentPlayer, scores, players } = context;
 
   const fieldToRender = [];
 
@@ -27,7 +27,7 @@ export const getGameUiStateFromContext = (context: GameContext): GameUiState => 
   }
 
   return {
-    winner,
+    phase,
     field: fieldToRender,
     cellsRevealedThisTurn: revealedCells,
     currentPlayer,

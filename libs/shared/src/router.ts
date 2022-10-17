@@ -1,8 +1,8 @@
 import { router, Subscription } from '@trpc/server';
 import * as zod from 'zod';
 
-import { GameContext } from './game-machine';
-import { GameUiState, getGameUiStateFromContext } from './game-ui-state';
+import { GameData } from './game-machine';
+import { GameUiState, getGameUiStateFromGameData } from './game-ui-state';
 import { GameManager, Player } from './game-manager';
 import { WebServerContext } from './web-server-context';
 
@@ -40,16 +40,16 @@ export const createRouterWithContext = <TContext extends WebServerContext>(gameM
         const { gameId } = input;
         
         return new Subscription<GameUiState | null>((emit) => {
-          const handleGameStateChange = (context: GameContext) => {
+          const handleGameStateChange = (data: GameData) => {
             emit.data(
-              getGameUiStateFromContext(context)
+              getGameUiStateFromGameData(data)
             );
           };
 
           if (!gameManager.isGameStarted(gameId)) {
             emit.data(null);
           } else {
-            handleGameStateChange(gameManager.getGameContext(gameId));
+            handleGameStateChange(gameManager.getGameData(gameId));
           }
 
           gameManager.on(gameId, 'gameStateChange', handleGameStateChange);
@@ -128,6 +128,20 @@ export const createRouterWithContext = <TContext extends WebServerContext>(gameM
         }
 
         gameManager.startGame(gameId);
+      }
+    })
+    .mutation('restartGame', {
+      input: zod.object({
+        gameId: zod.string().optional(),
+      }),
+      resolve({input}) {
+        const { gameId } = input;
+
+        if (gameId == null) {
+          throw new Error('Failed to re-start game because no gameId was provided');
+        }
+
+        gameManager.restartGame(gameId);
       }
     })
 };

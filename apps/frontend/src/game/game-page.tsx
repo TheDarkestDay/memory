@@ -44,10 +44,21 @@ export const GamePage = () => {
   });
 
   const startGame = trpc.useMutation('startGame');
+  const restartGame = trpc.useMutation('restartGame');
+
+  const isGameFinished = gameState?.phase === 'finished' ?? false;
 
   const handleStartButtonClick = () => {
-    startGame.mutateAsync({gameId});
+    if (isGameFinished) {
+      restartGame.mutateAsync({gameId});
+    } else {
+      startGame.mutateAsync({gameId});
+    }
   };
+
+  const startGameButtonLabel = isGameFinished 
+    ? 'Restart game' 
+    : 'Start game';
 
   return (
     <main css={styles.main}>
@@ -58,7 +69,7 @@ export const GamePage = () => {
 
         <FlexRow gap="1rem" styles={styles.controls}>
           <Button onClick={handleStartButtonClick} variant="primary">
-            Start
+            {startGameButtonLabel}
           </Button>
 
           <Button to="/" variant="secondary">

@@ -1,6 +1,6 @@
 import { randomUUID, randomBytes } from 'crypto';
-import { GameManager, Game, shuffleArray, createGameMachine, GameContext, GameFormValues, GameEvent, GameEventsMap, GameEventsPayloadMap, Player } from '@memory/shared';
-import { interpret } from 'xstate';
+import { GameManager, Game, shuffleArray, createGameMachine, GameContext, GameFormValues, GameEvent, GameEventsMap, GameEventsPayloadMap, Player, GameData, GamePhase, GameMachine } from '@memory/shared';
+import { AnyEventObject, interpret, State } from 'xstate';
 import { uniqueNamesGenerator, adjectives, animals } from 'unique-names-generator';
 
 const characters = [
@@ -61,13 +61,33 @@ export class InMemoryGameManager implements GameManager {
     }
 
     const machine = this.setUpGameMachine(targetGame);
-    const service = interpret(machine).onChange((context) => {
-      this.emit(gameId, 'gameStateChange', context);
+    const service = interpret(machine).onTransition((state) => {
+      this.emit(gameId, 'gameStateChange', this.buildGameDataFromState(state));
     });
 
     service.start();
 
     targetGame.service = service;
+  }
+
+  restartGame(gameId: string): void {
+    const targetGame = this.games.find(game => game.id === gameId);
+
+    if (targetGame == null) {
+      throw new Error(`Failed to start game with id ${gameId} because it does not exist`);
+    }
+
+    if (targetGame.service == null) {
+      throw new Error(`Failed to restart game with id ${gameId} because it has not been created`);
+    }
+
+    const { service } = targetGame;
+    
+    const snapshot = service.getSnapshot();
+    const { field } = snapshot.context;
+    const newField = this.setUpGameField(field.length);
+
+    service.send({type: 'RESTART', field: newField});
   }
 
   addPlayer(gameId: string) {
@@ -148,20 +168,22 @@ export class InMemoryGameManager implements GameManager {
     return targetGame.players;
   }
 
-  getGameContext(gameId: string): GameContext {
+  getGameData(gameId: string): GameData {
     const targetGame = this.games.find(game => game.id === gameId);
 
     if (targetGame == null) {
-      throw new Error(`Failed to get game context for game with id ${gameId} because it does not exist`);
+      throw new Error(`Failed to get game data for game with id ${gameId} because it does not exist`);
     }
 
     const { service } = targetGame;
 
     if (service === null) {
-      throw new Error(`Failed to get game context for game with id ${gameId} because it has not been started`);
+      throw new Error(`Failed to get game data for game with id ${gameId} because it has not been started`);
     }
 
-    return service.getSnapshot().context;
+    const stateSnapshot = service.getSnapshot();
+
+    return this.buildGameDataFromState(stateSnapshot);
   }
 
   revealCell(gameId: string, row: number, col: number, playerName: string): void {
@@ -214,6 +236,15 @@ export class InMemoryGameManager implements GameManager {
     return targetGame.service !== null;
   }
 
+  private buildGameDataFromState(state: State<GameContext, AnyEventObject>): GameData {
+    const { value, context } = state;
+
+    return {
+      phase: value as GamePhase,
+      ...context
+    };
+  }
+
   private emit(gameId: string, event: GameEvent, payload: GameEventsPayloadMap[typeof event]): void {
     const gameListeners = this.eventListeners[gameId];
     if (!gameListeners) {
@@ -225,7 +256,7 @@ export class InMemoryGameManager implements GameManager {
     targetEventListeners.forEach((listener) => listener(payload as any));
   }
 
-  private setUpGameMachine({fieldSize, players}: Game) {
+  private setUpGameField(fieldSize: number): string[][] {
     const gameField = [] as string[][];
     for (let j = 0; j < fieldSize; j++) {
       gameField.push([]);
@@ -259,9 +290,13 @@ export class InMemoryGameManager implements GameManager {
       gameField[x2][y2] = character;
     }
 
+    return gameField;
+  }
+
+  private setUpGameMachine({fieldSize, players}: Game) {
     return createGameMachine({
       players: players.map((player) => player.name),
-      field: gameField,
+      field: this.setUpGameField(fieldSize),
     });
   }
 };

@@ -1,22 +1,31 @@
-import { createMachine, assign } from 'xstate';
+import { createMachine, assign, send } from 'xstate';
 
 type GameStateConfig = {
   field: string[][];
   players: string[];
 };
 
+export type GamePhase = 'playing' | 'finished';
+
 export type GameContext = GameStateConfig & {
-  winner: string | null;
   scores: Record<string, number>;
   currentPlayer: string;
   revealedCells: [number, number][];
   capturedCells: [number, number][];
 };
 
+export type GameData = {
+  phase: GamePhase;
+} & GameContext;
+
 type TakeOneEvent = {
   row: number;
   col: number;
   playerName: string;
+};
+
+type RestartEvent = {
+  field: string[][];
 };
 
 export const createGameMachine = ({field, players}: GameStateConfig) => {
@@ -35,7 +44,6 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
       context: {} as GameContext,
     },
     context: {
-      winner: null,
       field,
       players,
       currentPlayer: players[0],
@@ -84,7 +92,7 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
           ],
           CHECK_SCORE: [
             {
-              target: 'playing',
+              target: 'lookingForWinner',
               cond: (context) => context.revealedCells.length === 2,
               actions: assign<GameContext>((context) => {
                 const { players, field, scores, currentPlayer, capturedCells } = context;
@@ -119,6 +127,42 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
           ]
         }
       },
+      lookingForWinner: {
+        entry: send('CHECK_WINNER'),
+        on: {
+          CHECK_WINNER: [
+            {
+              target: 'playing',
+              cond: (context) => context.capturedCells.length < (field.length * field[0].length),
+            },
+            {
+              target: 'finished',
+              cond: (context) => context.capturedCells.length === (field.length * field[0].length),
+            },
+          ]
+        }
+      },
+      finished: {
+        on: {
+          RESTART: [
+            {
+              target: 'playing',
+              actions: assign<GameContext>((_context, event) => {
+                const { field } = event as unknown as RestartEvent;
+
+                return {
+                  field,
+                  players,
+                  currentPlayer: players[0],
+                  scores,
+                  revealedCells: [],
+                  capturedCells: [],
+                };
+              })
+            }
+          ]
+        }
+      }
     },
   }, {
     actions: {},
