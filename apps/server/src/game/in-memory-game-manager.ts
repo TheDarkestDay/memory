@@ -132,12 +132,14 @@ export class InMemoryGameManager implements GameManager {
     return player;
   }
 
-  isPlayerJoinedGame(playerId: string): boolean {
-    return this.games.some(
-      (game) => game.players.some(
-        (player) => player.id === playerId
-      )
-    );
+  isPlayerJoinedGame(gameId: string, playerId: string): boolean {
+    const targetGame = this.games.find((game) => game.id === gameId);
+
+    if (targetGame == null) {
+      return false;
+    }
+
+    return targetGame.players.some((player) => player.id === playerId);
   }
 
   removePlayer(gameId: string, playerName: string): void {
