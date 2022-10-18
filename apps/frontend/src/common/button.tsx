@@ -9,6 +9,7 @@ type Props = {
   to?: string;
   onClick?: () => void;
   size?: 'md' | 'lg';
+  fullWidth?: boolean;
 } & ButtonHTMLAttributes<HTMLButtonElement>;
 
 const primaryColors = css({
@@ -23,7 +24,7 @@ const secondaryColors = css({
   '--hover-color': '#6395b8',
 });
 
-export const Button = ({children, onClick, variant, styles, type, size = 'md', to}: Props) => {
+export const Button = ({children, onClick, variant, styles, fullWidth = false, type, size = 'md', to}: Props) => {
   const colors = variant === 'primary' ? primaryColors : secondaryColors;
   const rootCss = css({
     backgroundColor: 'var(--bg-color)',
@@ -33,6 +34,7 @@ export const Button = ({children, onClick, variant, styles, type, size = 'md', t
     fontWeight: 'bold',
     fontSize: size === 'lg' ? '2rem' : '1.25rem',
     minWidth: '8rem',
+    width: fullWidth ? '100%' : 'auto',
     border: 'none',
     ':hover': {
       backgroundColor: 'var(--hover-color)',
@@ -42,6 +44,8 @@ export const Button = ({children, onClick, variant, styles, type, size = 'md', t
 
   if (to != null) {
     const linkCss = css(rootCss, {
+      display: 'block',
+      textAlign: 'center',
       textDecoration: 'none',
     });
 

@@ -34,9 +34,6 @@ const styles = {
     fontWeight: 'bold',
     marginBottom: '16px',
   }),
-  createGameButton: css({
-    width: '100%'
-  }),
   chip: css({
     display: 'block',
     textAlign: 'center',
@@ -130,7 +127,7 @@ export const WizardPage = () => {
           </FlexRow>
         </fieldset>
 
-        <Button variant="primary" size="lg" styles={styles.createGameButton} type="submit">
+        <Button variant="primary" size="lg" fullWidth type="submit">
           Create Game
         </Button>
       </Form>

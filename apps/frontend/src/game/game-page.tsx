@@ -7,6 +7,7 @@ import { Button } from '../common/button';
 import { FlexRow } from '../layout';
 import { trpc } from '../trpc';
 import { GameField } from './game-field';
+import { GameResultsDialog } from './game-results-dialog';
 import { PlayersList } from './players-list';
 
 const styles = {
@@ -56,6 +57,10 @@ export const GamePage = () => {
     }
   };
 
+  const handleDialogRestartButtonClick = () => {
+    restartGame.mutateAsync({gameId});
+  };
+
   const startGameButtonLabel = isGameFinished 
     ? 'Restart game' 
     : 'Start game';
@@ -83,6 +88,10 @@ export const GamePage = () => {
       </section>
 
       <PlayersList activePlayerName={gameState?.currentPlayer} scores={gameState?.scores} />
+
+      {
+        isGameFinished && <GameResultsDialog onRestart={handleDialogRestartButtonClick} scores={gameState?.scores ?? {john: 3, robert: 5, alice: 6, kirk: 1}} />
+      }
     </main>
   );
 };
