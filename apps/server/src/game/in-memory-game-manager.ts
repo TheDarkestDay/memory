@@ -1,9 +1,9 @@
 import { randomUUID, randomBytes } from 'crypto';
-import { GameManager, Game, shuffleArray, createGameMachine, GameContext, GameFormValues, GameEvent, GameEventsMap, GameEventsPayloadMap, Player, GameData, GamePhase, GameMachine } from '@memory/shared';
+import { GameManager, Game, shuffleArray, createGameMachine, GameContext, GameFormValues, GameEvent, GameEventsMap, GameEventsPayloadMap, Player, GameData, GamePhase, GameMachine, GameTheme } from '@memory/shared';
 import { AnyEventObject, interpret, State } from 'xstate';
 import { uniqueNamesGenerator, adjectives, animals } from 'unique-names-generator';
 
-const characters = [
+const emojis = [
   '❤️', 
   '😊', 
   '✨', 
@@ -29,6 +29,25 @@ const characters = [
   '🤣',
   '🤗'
 ];
+
+const getNumberCharacters = (count: number) => {
+  return Array.from({length: count})
+    .map((_, index) => {
+      const numericValue = index + 1;
+
+      return numericValue.toString();
+    });
+};
+
+const getCharactersForField = (fieldSize: number, theme: GameTheme) => {
+  const requiredCharactersCount = fieldSize * fieldSize / 2;
+  
+  if (theme === 'numbers') {
+    return getNumberCharacters(requiredCharactersCount);
+  }
+
+  return emojis.slice(0, requiredCharactersCount);
+};
 
 export class InMemoryGameManager implements GameManager {
   private games: Game[] = [];
@@ -81,11 +100,11 @@ export class InMemoryGameManager implements GameManager {
       throw new Error(`Failed to restart game with id ${gameId} because it has not been created`);
     }
 
-    const { service } = targetGame;
+    const { service, theme } = targetGame;
     
     const snapshot = service.getSnapshot();
     const { field } = snapshot.context;
-    const newField = this.setUpGameField(field.length);
+    const newField = this.setUpGameField(field.length, theme);
 
     service.send({type: 'RESTART', field: newField});
   }
@@ -258,7 +277,7 @@ export class InMemoryGameManager implements GameManager {
     targetEventListeners.forEach((listener) => listener(payload as any));
   }
 
-  private setUpGameField(fieldSize: number): string[][] {
+  private setUpGameField(fieldSize: number, theme: GameTheme): string[][] {
     const gameField = [] as string[][];
     for (let j = 0; j < fieldSize; j++) {
       gameField.push([]);
@@ -273,11 +292,9 @@ export class InMemoryGameManager implements GameManager {
 
     const randomPositions = shuffleArray(gameFieldPositions);
 
-    const requiredCharacters = fieldSize * fieldSize / 2;
+    const charactersForField = getCharactersForField(fieldSize, theme);
 
-    for (let i = 0; i < requiredCharacters; i++) {
-      const character = characters[i];
-
+    for (const character of charactersForField) {
       const firstPosition = randomPositions.pop();
       const secondPosition = randomPositions.pop();
 
@@ -295,10 +312,10 @@ export class InMemoryGameManager implements GameManager {
     return gameField;
   }
 
-  private setUpGameMachine({fieldSize, players}: Game) {
+  private setUpGameMachine({fieldSize, players, theme}: Game) {
     return createGameMachine({
       players: players.map((player) => player.name),
-      field: this.setUpGameField(fieldSize),
+      field: this.setUpGameField(fieldSize, theme),
     });
   }
 };
