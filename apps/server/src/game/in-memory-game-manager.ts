@@ -1,58 +1,16 @@
 import { randomUUID, randomBytes } from 'crypto';
-import { GameManager, Game, shuffleArray, createGameMachine, GameContext, GameFormValues, GameEvent, GameEventsMap, GameEventsPayloadMap, Player, GameData, GamePhase, GameMachine, GameTheme } from '@memory/shared';
+import { GameManager, Game, createGameMachine, GameContext, GameFormValues, GameEvent, GameEventsMap, GameEventsPayloadMap, Player, GameData, GamePhase } from '@memory/shared';
 import { AnyEventObject, interpret, State } from 'xstate';
 import { uniqueNamesGenerator, adjectives, animals } from 'unique-names-generator';
-
-const emojis = [
-  '❤️', 
-  '😊', 
-  '✨', 
-  '🔥', 
-  '😂', 
-  '👍', 
-  '✅', 
-  '✔️', 
-  '😭', 
-  '🥰', 
-  '😍', 
-  '🥺',
-  '🤍',
-  '👀',
-  '🎉',
-  '🥲',
-  '😉',
-  '👉',
-  '⭐',
-  '❤️‍🔥',
-  '🤔',
-  '🤩',
-  '🤣',
-  '🤗'
-];
-
-const getNumberCharacters = (count: number) => {
-  return Array.from({length: count})
-    .map((_, index) => {
-      const numericValue = index + 1;
-
-      return numericValue.toString();
-    });
-};
-
-const getCharactersForField = (fieldSize: number, theme: GameTheme) => {
-  const requiredCharactersCount = fieldSize * fieldSize / 2;
-  
-  if (theme === 'numbers') {
-    return getNumberCharacters(requiredCharactersCount);
-  }
-
-  return emojis.slice(0, requiredCharactersCount);
-};
+import { gameFieldFactory, GameFieldFactory } from './game-field-factory';
 
 export class InMemoryGameManager implements GameManager {
   private games: Game[] = [];
 
   private eventListeners: Record<string, Record<GameEvent, GameEventsMap[GameEvent][]>> = {};
+
+  constructor(private gameFieldFactory: GameFieldFactory) {
+  }
 
   async createNewGame({theme, fieldSize}: GameFormValues): Promise<Game> {
     const game: Game = {
@@ -104,7 +62,7 @@ export class InMemoryGameManager implements GameManager {
     
     const snapshot = service.getSnapshot();
     const { field } = snapshot.context;
-    const newField = this.setUpGameField(field.length, theme);
+    const newField = this.gameFieldFactory.createGameField(field.length, theme);
 
     service.send({type: 'RESTART', field: newField});
   }
@@ -277,47 +235,14 @@ export class InMemoryGameManager implements GameManager {
     targetEventListeners.forEach((listener) => listener(payload as any));
   }
 
-  private setUpGameField(fieldSize: number, theme: GameTheme): string[][] {
-    const gameField = [] as string[][];
-    for (let j = 0; j < fieldSize; j++) {
-      gameField.push([]);
-    }
-
-    const gameFieldPositions = [];
-    for (let i = 0; i < fieldSize; i++) {
-      for (let j = 0; j < fieldSize; j++) {
-        gameFieldPositions.push([i, j]);
-      }
-    }
-
-    const randomPositions = shuffleArray(gameFieldPositions);
-
-    const charactersForField = getCharactersForField(fieldSize, theme);
-
-    for (const character of charactersForField) {
-      const firstPosition = randomPositions.pop();
-      const secondPosition = randomPositions.pop();
-
-      if (!firstPosition || !secondPosition) {
-        throw new Error('Field is not big enough for number of characters requested');
-      }
-
-      const [x1, y1] = firstPosition;
-      const [x2, y2] = secondPosition;
-
-      gameField[x1][y1] = character;
-      gameField[x2][y2] = character;
-    }
-
-    return gameField;
-  }
-
   private setUpGameMachine({fieldSize, players, theme}: Game) {
     return createGameMachine({
       players: players.map((player) => player.name),
-      field: this.setUpGameField(fieldSize, theme),
+      field: this.gameFieldFactory.createGameField(fieldSize, theme),
     });
   }
 };
 
-export const inMemoryGameManager = new InMemoryGameManager();
+export const inMemoryGameManager = new InMemoryGameManager(
+  gameFieldFactory
+);
