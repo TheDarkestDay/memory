@@ -1,4 +1,4 @@
-import { createMachine, assign, send } from 'xstate';
+import { createMachine, assign, send, InterpreterFrom } from 'xstate';
 
 type GameStateConfig = {
   field: string[][];
@@ -170,3 +170,5 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
 };
 
 export type GameMachine = ReturnType<typeof createGameMachine>;
+
+export type GameService = InterpreterFrom<GameMachine>;

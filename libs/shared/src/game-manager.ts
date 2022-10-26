@@ -1,6 +1,4 @@
-import { InterpreterFrom } from 'xstate';
-
-import { GameData, GameMachine } from './game-machine';
+import { GameData, GameService } from './game-machine';
 
 export type GameTheme = 'numbers' | 'emojis';
 
@@ -45,7 +43,7 @@ export type Player = {
 
 export type Game = {
   id: string;
-  service: InterpreterFrom<GameMachine>;
+  service: GameService;
   players: Player[];
   fieldSize: number;
   theme: GameTheme;
