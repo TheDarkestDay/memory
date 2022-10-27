@@ -104,4 +104,47 @@ describe('RobotPlayer', () => {
         expect(didRobotRevealTopRightCorner).toBe(true);
         expect(didRobotRevealBottomLeftCorner).toBe(true);
     });
+
+    it('should not try to reveal the match just discovered by its opponent', () => {
+        const machine = createGameMachine({
+            field: [
+                ['1', '2'],
+                ['2', '3']
+            ],
+            players: [
+                'Joe',
+                'Robo-Joe'
+            ]
+        });
+        const service = interpret(machine);
+
+        service.start();
+
+        service.send({
+            type: 'REVEAL_NEXT_CELL',
+            row: 0,
+            col: 1,
+            playerName: 'Joe'
+        });
+        service.send({
+            type: 'REVEAL_NEXT_CELL',
+            row: 1,
+            col: 0,
+            playerName: 'Joe'
+        });
+
+        jest.runAllTimers();
+
+        const snapshot = service.getSnapshot();
+        const actions = snapshot.actions;
+        
+        const lastJoeActionIndex = actions.findIndex((action) => action.playerName === 'Joe');
+        const robotActions = actions.slice(lastJoeActionIndex + 1);
+
+        const didRobotRevealTopLeftCorner = robotActions.some((action) => action.row === 0 && action.col === 0);
+        const didRobotRevealBottomRightCorner = robotActions.some((action) => action.row === 1 && action.col === 1);
+
+        expect(didRobotRevealTopLeftCorner).toBe(true);
+        expect(didRobotRevealBottomRightCorner).toBe(true);
+    });
 });

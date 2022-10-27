@@ -221,7 +221,7 @@ export class InMemoryGameManager implements GameManager {
     return {
       phase: value as GamePhase,
       ...context
-    };
+    }
   }
 
   private emit(gameId: string, event: GameEvent, payload: GameEventsPayloadMap[typeof event]): void {
