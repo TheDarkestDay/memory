@@ -1,10 +1,12 @@
 import { createGameMachine } from "@memory/shared";
 import { interpret } from "xstate";
 
+import { RobotPlayer } from './robot-player';
+
 jest.useFakeTimers();
 
 describe('RobotPlayer', () => {
-    it('should reveal new cells if no matches have been discovered', () => {
+    fit('should reveal new cells if no matches have been discovered', () => {
         const machine = createGameMachine({
             field: [
                 ['1', '2'],
@@ -17,7 +19,11 @@ describe('RobotPlayer', () => {
         });
         const service = interpret(machine);
 
+        const roboJoe = new RobotPlayer('Robo-Joe', service);
+
         service.start();
+
+        roboJoe.startPlaying();
 
         service.send({
             type: 'REVEAL_NEXT_CELL',
@@ -39,6 +45,12 @@ describe('RobotPlayer', () => {
         
         const lastJoeActionIndex = actions.findIndex((action) => action.playerName === 'Joe');
         const robotActions = actions.slice(lastJoeActionIndex + 1);
+
+        console.log(`Recorded ${snapshot.actions.length} actions`);
+
+        actions.forEach((action) => {
+            console.log('Got action', action);
+        });
 
         const didRobotRevealBottomLeftCorner = robotActions.some((action) => action.row === 1 && action.col === 0);
         const didRobotRevealBottomRightCorner = robotActions.some((action) => action.row === 1 && action.col === 1);

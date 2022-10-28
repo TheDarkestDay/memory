@@ -4,8 +4,6 @@ import { State, AnyEventObject } from "xstate";
 const ACTIONS_DELAY = 750;
 
 export class RobotPlayer {
-
-
     constructor(private name: string, private gameService: GameService) {
     }
 
@@ -30,9 +28,10 @@ export class RobotPlayer {
     }
 
     private handleStateChange(state: State<GameContext, AnyEventObject>) {
+        console.log('Robot is handling state change...');
         const { value } = state;
 
-        if (value === 'finished') {
+        if (value !== 'playing') {
             return;
         }
 
@@ -41,6 +40,10 @@ export class RobotPlayer {
 
         if (currentPlayer !== this.name) {
             const lastRevealedCell = revealedCells[revealedCells.length - 1];
+            if (lastRevealedCell == null) {
+                return;
+            }
+
             const [row, col] = lastRevealedCell;
             const cellContent = field[row][col];
 
@@ -54,14 +57,26 @@ export class RobotPlayer {
             .find((cells) => cells.length === 2);
 
            if (foundMatch) {
-            const [[rowA, colA], [rowB, colB]] = foundMatch;
-            this.gameService.send({type: 'REVEAL_NEXT_CELL', playerName: this.name, row: rowA, col: colA});
+            console.log('Robot trying to score the match...');
+            const [[row, col]] = foundMatch.slice(revealedCells.length);
 
+            setTimeout(() => {
+                console.log(`Revealing cell ${row} ${col}`);
+                this.gameService.send({type: 'REVEAL_NEXT_CELL', playerName: this.name, row, col});
+            }, ACTIONS_DELAY);
            } else {
-            const randomPositionIndex = getRandomNumber(0, this.notYetRevealedCells.length);
-            const [row, col] = this.notYetRevealedCells.splice(randomPositionIndex, 1);
+            console.log('Robot trying to explore unknown cells');
+            const randomPositionIndex = getRandomNumber(0, this.notYetRevealedCells.length - 1);
+            if (this.notYetRevealedCells.length === 0) {
+                return;
+            }
 
-            this.gameService.send({type: 'REVEAL_NEXT_CELL', playerName: this.name, row, col});
+            const [[row, col]] = this.notYetRevealedCells.splice(randomPositionIndex, 1);
+
+            setTimeout(() => {
+                console.log(`Revealing cell ${row} ${col}`);
+                this.gameService.send({type: 'REVEAL_NEXT_CELL', playerName: this.name, row, col});
+            }, ACTIONS_DELAY);
            } 
         }
     }
