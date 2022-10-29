@@ -1,7 +1,7 @@
-import { GameContext, GameService, getRandomNumber } from "@memory/shared";
+import { GameContext, GameService, getRandomNumber, RevealNextCellEvent } from "@memory/shared";
 import { State, AnyEventObject } from "xstate";
 
-const ACTIONS_DELAY = 750;
+type ActionListener = (event: RevealNextCellEvent) => void;
 
 export class RobotPlayer {
     constructor(private name: string, private gameService: GameService) {
@@ -25,13 +25,13 @@ export class RobotPlayer {
 
     dispose() {
         this.gameService.off(this.stateChangeHandler);
+        this.listeners = [];
     }
 
     private handleStateChange(state: State<GameContext, AnyEventObject>) {
-        console.log('Robot is handling state change...');
         const { value } = state;
 
-        if (value !== 'playing') {
+        if (value === 'finished' || value === 'lookingForWinner') {
             return;
         }
 
@@ -53,32 +53,31 @@ export class RobotPlayer {
 
             this.charactersLocations[cellContent].push(lastRevealedCell);
         } else {
-           const foundMatch = Object.values(this.charactersLocations)
-            .find((cells) => cells.length === 2);
+            const foundMatch = Object.values(this.charactersLocations)
+                .find((cells) => cells.length === 2);
 
-           if (foundMatch) {
-            console.log('Robot trying to score the match...');
-            const [[row, col]] = foundMatch.slice(revealedCells.length);
+            if (foundMatch != null) {
+                const [[row, col]] = foundMatch.slice(revealedCells.length);
 
-            setTimeout(() => {
-                console.log(`Revealing cell ${row} ${col}`);
-                this.gameService.send({type: 'REVEAL_NEXT_CELL', playerName: this.name, row, col});
-            }, ACTIONS_DELAY);
-           } else {
-            console.log('Robot trying to explore unknown cells');
-            const randomPositionIndex = getRandomNumber(0, this.notYetRevealedCells.length - 1);
-            if (this.notYetRevealedCells.length === 0) {
-                return;
+                this.notifyListeners({ playerName: this.name, row, col });
+            } else {
+                const randomPositionIndex = getRandomNumber(0, this.notYetRevealedCells.length - 1);
+                if (this.notYetRevealedCells.length === 0) {
+                    return;
+                }
+
+                const [[row, col]] = this.notYetRevealedCells.splice(randomPositionIndex, 1);
+                this.notifyListeners({ playerName: this.name, row, col });
             }
-
-            const [[row, col]] = this.notYetRevealedCells.splice(randomPositionIndex, 1);
-
-            setTimeout(() => {
-                console.log(`Revealing cell ${row} ${col}`);
-                this.gameService.send({type: 'REVEAL_NEXT_CELL', playerName: this.name, row, col});
-            }, ACTIONS_DELAY);
-           } 
         }
+    }
+
+    addActionListener(listener: ActionListener) {
+        this.listeners.push(listener);
+    }
+
+    private notifyListeners(event: RevealNextCellEvent) {
+        this.listeners.forEach((listener) => listener(event));
     }
 
     private stateChangeHandler = this.handleStateChange.bind(this);
@@ -86,4 +85,6 @@ export class RobotPlayer {
     private charactersLocations: Record<string, [number, number][]> = {};
 
     private notYetRevealedCells: [number, number][] = [];
+
+    private listeners: ActionListener[] = [];
 }

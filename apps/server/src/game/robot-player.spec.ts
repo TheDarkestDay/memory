@@ -6,7 +6,11 @@ import { RobotPlayer } from './robot-player';
 jest.useFakeTimers();
 
 describe('RobotPlayer', () => {
-    fit('should reveal new cells if no matches have been discovered', () => {
+    afterEach(() => {
+        jest.runOnlyPendingTimers();
+    });
+
+    it('should reveal new cells if no matches have been discovered', () => {
         const machine = createGameMachine({
             field: [
                 ['1', '2'],
@@ -19,7 +23,14 @@ describe('RobotPlayer', () => {
         });
         const service = interpret(machine);
 
+        const actionsListener = jest.fn().mockImplementation((event) => {
+           service.send({type: 'REVEAL_NEXT_CELL', ...event});
+           jest.runOnlyPendingTimers(); 
+        });
+
         const roboJoe = new RobotPlayer('Robo-Joe', service);
+
+        roboJoe.addActionListener(actionsListener);
 
         service.start();
 
@@ -31,26 +42,16 @@ describe('RobotPlayer', () => {
             col: 0,
             playerName: 'Joe'
         });
+
         service.send({
             type: 'REVEAL_NEXT_CELL',
             row: 0,
             col: 1,
             playerName: 'Joe'
         });
+        jest.runOnlyPendingTimers();
 
-        jest.runAllTimers();
-
-        const snapshot = service.getSnapshot();
-        const actions = snapshot.actions;
-        
-        const lastJoeActionIndex = actions.findIndex((action) => action.playerName === 'Joe');
-        const robotActions = actions.slice(lastJoeActionIndex + 1);
-
-        console.log(`Recorded ${snapshot.actions.length} actions`);
-
-        actions.forEach((action) => {
-            console.log('Got action', action);
-        });
+        const robotActions = actionsListener.mock.calls.map(([action]) => action);
 
         const didRobotRevealBottomLeftCorner = robotActions.some((action) => action.row === 1 && action.col === 0);
         const didRobotRevealBottomRightCorner = robotActions.some((action) => action.row === 1 && action.col === 1);
@@ -72,7 +73,17 @@ describe('RobotPlayer', () => {
         });
         const service = interpret(machine);
 
+        const roboJoe = new RobotPlayer('Robo-Joe', service);
+
+        const actionsListener = jest.fn().mockImplementation((event) => {
+            service.send({type: 'REVEAL_NEXT_CELL', ...event});
+            jest.runOnlyPendingTimers(); 
+        });
+
+        roboJoe.addActionListener(actionsListener);
+
         service.start();
+        roboJoe.startPlaying();
 
         service.send({
             type: 'REVEAL_NEXT_CELL',
@@ -86,8 +97,7 @@ describe('RobotPlayer', () => {
             col: 1,
             playerName: 'Joe'
         });
-
-        jest.runAllTimers();
+        jest.runOnlyPendingTimers();
 
         service.send({
             type: 'REVEAL_NEXT_CELL',
@@ -101,14 +111,9 @@ describe('RobotPlayer', () => {
             col: 1,
             playerName: 'Joe'
         });
+        jest.runOnlyPendingTimers();
 
-        jest.runAllTimers();
-
-        const snapshot = service.getSnapshot();
-        const actions = snapshot.actions;
-        
-        const lastJoeActionIndex = actions.findIndex((action) => action.playerName === 'Joe');
-        const robotActions = actions.slice(lastJoeActionIndex + 1);
+        const robotActions = actionsListener.mock.calls.map(([action]) => action);
 
         const didRobotRevealTopRightCorner = robotActions.some((action) => action.row === 0 && action.col === 1);
         const didRobotRevealBottomLeftCorner = robotActions.some((action) => action.row === 1 && action.col === 0);
@@ -130,7 +135,18 @@ describe('RobotPlayer', () => {
         });
         const service = interpret(machine);
 
+        const roboJoe = new RobotPlayer('Robo-Joe', service);
+
+        const actionsListener = jest.fn().mockImplementation((event) => {
+            console.log('Robot revealing cell: ', event);
+            service.send({type: 'REVEAL_NEXT_CELL', ...event});
+            jest.runOnlyPendingTimers(); 
+        });
+
+        roboJoe.addActionListener(actionsListener);
+
         service.start();
+        roboJoe.startPlaying();
 
         service.send({
             type: 'REVEAL_NEXT_CELL',
@@ -144,14 +160,9 @@ describe('RobotPlayer', () => {
             col: 0,
             playerName: 'Joe'
         });
+        jest.runOnlyPendingTimers();
 
-        jest.runAllTimers();
-
-        const snapshot = service.getSnapshot();
-        const actions = snapshot.actions;
-        
-        const lastJoeActionIndex = actions.findIndex((action) => action.playerName === 'Joe');
-        const robotActions = actions.slice(lastJoeActionIndex + 1);
+        const robotActions = actionsListener.mock.calls.map(([action]) => action);
 
         const didRobotRevealTopLeftCorner = robotActions.some((action) => action.row === 0 && action.col === 0);
         const didRobotRevealBottomRightCorner = robotActions.some((action) => action.row === 1 && action.col === 1);

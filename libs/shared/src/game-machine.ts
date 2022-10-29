@@ -18,7 +18,7 @@ export type GameData = {
   phase: GamePhase;
 } & GameContext;
 
-type TakeOneEvent = {
+export type RevealNextCellEvent = {
   row: number;
   col: number;
   playerName: string;
@@ -27,6 +27,15 @@ type TakeOneEvent = {
 type RestartEvent = {
   field: string[][];
 };
+
+const REVEAL_CELL_ACTION = assign<GameContext>((context, event) => {
+  const { row, col } = event as unknown as RevealNextCellEvent;
+
+  return {
+    ...context,
+    revealedCells: [...context.revealedCells, [row, col]],
+  };
+});
 
 export const createGameMachine = ({field, players}: GameStateConfig) => {
   const scores = players.reduce((acc, playerName) => {
@@ -38,7 +47,7 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
 
   return createMachine({
     id: 'game',
-    initial: 'playing',
+    initial: 'noCellsRevealed',
     predictableActionArguments: true,
     schema: {
       context: {} as GameContext,
@@ -52,7 +61,33 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
       capturedCells: [],
     },
     states: {
-      playing: {
+      noCellsRevealed: {
+        on: {
+          REVEAL_NEXT_CELL: [
+            {
+              cond: 'isTurnValid',
+              target: 'firstCellRevealed',
+              actions: [
+                REVEAL_CELL_ACTION             
+              ]
+            }
+          ]
+        }
+      },
+      firstCellRevealed: {
+        on: {
+          REVEAL_NEXT_CELL: [
+            {
+              cond: 'isTurnValid',
+              target: 'secondCellRevealed',
+              actions: [
+                REVEAL_CELL_ACTION             
+              ]
+            }
+          ]
+        }
+      },
+      secondCellRevealed: {
         invoke: {
           id: 'checkScore',
           src: () => {
@@ -66,30 +101,6 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
           }
         },
         on: {
-          REVEAL_NEXT_CELL: [
-            {
-              cond: (context, event) => {
-                const { playerName, row, col } = event as unknown as TakeOneEvent;
-                const { currentPlayer, revealedCells } = context;
-
-                const allVisibleCells = [...revealedCells, ...context.capturedCells];
-                const isRequestedCellVisible = allVisibleCells.some(([cellRow, cellCol]) => cellRow === row && cellCol === col);
-                
-                return !isRequestedCellVisible && currentPlayer === playerName && revealedCells.length < 2;
-              },
-              target: 'playing',
-              actions: [
-                assign<GameContext>((context, event) => {
-                  const { row, col } = event as unknown as TakeOneEvent;
-    
-                  return {
-                    ...context,
-                    revealedCells: [...context.revealedCells, [row, col]],
-                  };
-                })
-              ]
-            }
-          ],
           CHECK_SCORE: [
             {
               target: 'lookingForWinner',
@@ -132,7 +143,7 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
         on: {
           CHECK_WINNER: [
             {
-              target: 'playing',
+              target: 'noCellsRevealed',
               cond: (context) => context.capturedCells.length < (field.length * field[0].length),
             },
             {
@@ -146,7 +157,7 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
         on: {
           RESTART: [
             {
-              target: 'playing',
+              target: 'noCellsRevealed',
               actions: assign<GameContext>((_context, event) => {
                 const { field } = event as unknown as RestartEvent;
 
@@ -166,6 +177,17 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
     },
   }, {
     actions: {},
+    guards: {
+      isTurnValid: (context, event) => {
+        const { playerName, row, col } = event as unknown as RevealNextCellEvent;
+        const { currentPlayer, revealedCells } = context;
+
+        const allVisibleCells = [...revealedCells, ...context.capturedCells];
+        const isRequestedCellVisible = allVisibleCells.some(([cellRow, cellCol]) => cellRow === row && cellCol === col);
+        
+        return !isRequestedCellVisible && currentPlayer === playerName && revealedCells.length < 2;
+      }
+    }
   });
 };
 
