@@ -38,6 +38,15 @@ export class RobotPlayer {
         const { context } = state;
         const { currentPlayer, revealedCells, field } = context;
 
+        if (value === 'secondCellRevealed') {
+            const [[rowA, colA], [rowB, colB]] = revealedCells;
+
+            const cellAContent = field[rowA][colA];
+            if (cellAContent === field[rowB][colB]) {
+                delete this.charactersLocations[cellAContent];
+            }
+        }
+
         if (currentPlayer !== this.name) {
             const lastRevealedCell = revealedCells[revealedCells.length - 1];
             if (lastRevealedCell == null) {

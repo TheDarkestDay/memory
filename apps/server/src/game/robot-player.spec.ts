@@ -6,7 +6,7 @@ import { RobotPlayer } from './robot-player';
 jest.useFakeTimers();
 
 describe('RobotPlayer', () => {
-    afterEach(() => {
+    beforeEach(() => {
         jest.runOnlyPendingTimers();
     });
 
@@ -169,5 +169,35 @@ describe('RobotPlayer', () => {
 
         expect(didRobotRevealTopLeftCorner).toBe(true);
         expect(didRobotRevealBottomRightCorner).toBe(true);
+    });
+
+    it('should be able to make the first turn', () => {
+        const machine = createGameMachine({
+            field: [
+                ['1', '2'],
+                ['2', '3']
+            ],
+            players: [
+                'Robo-Joe',
+                'Joe'
+            ]
+        });
+        const service = interpret(machine);
+
+        const roboJoe = new RobotPlayer('Robo-Joe', service);
+
+        const actionsListener = jest.fn().mockImplementation((event) => {
+            service.send({type: 'REVEAL_NEXT_CELL', ...event});
+            jest.runOnlyPendingTimers(); 
+        });
+
+        roboJoe.addActionListener(actionsListener);
+
+        service.start();
+        roboJoe.startPlaying();
+
+        const robotActions = actionsListener.mock.calls.map(([action]) => action);
+
+        expect(robotActions.length).toEqual(2);
     });
 });
