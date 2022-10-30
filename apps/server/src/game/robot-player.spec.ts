@@ -138,6 +138,78 @@ describe('RobotPlayer', () => {
         });
     });
 
+    it('should not try to reveal a match just discovered by its own', () => {
+        const machine = createGameMachine({
+            field: [
+                ['1', '2'],
+                ['2', '3']
+            ],
+            players: [
+                'Joe',
+                'Robo-Joe'
+            ]
+        }, { checkScoreDelay: CHECK_SCORE_DELAY });
+        const service = interpret(machine);
+
+        const roboJoe = new RobotPlayer('Robo-Joe', service);
+
+        const actionsListener = jest.fn().mockImplementation((event) => {
+            service.send({ type: 'REVEAL_NEXT_CELL', ...event });
+        });
+
+        roboJoe.addActionListener(actionsListener);
+
+        let turnsPassed = 0;
+        service.onTransition((state) => {
+            const { value } = state;
+
+            if (value === 'lookingForWinner') {
+                turnsPassed += 1;
+
+                if (turnsPassed === 2) {
+                    service.send({
+                        type: 'REVEAL_NEXT_CELL',
+                        row: 0,
+                        col: 0,
+                        playerName: 'Joe'
+                    });
+                    service.send({
+                        type: 'REVEAL_NEXT_CELL',
+                        row: 1,
+                        col: 1,
+                        playerName: 'Joe'
+                    });
+                }
+
+                if (turnsPassed === 4) {
+                    const robotActions = actionsListener.mock.calls.map(([action]) => action);
+
+                    const didRobotRevealTopRightCorner = robotActions.some((action) => action.row === 0 && action.col === 0);
+                    const didRobotRevealBottomLeftCorner = robotActions.some((action) => action.row === 1 && action.col === 1);
+
+                    expect(didRobotRevealTopRightCorner).toBe(true);
+                    expect(didRobotRevealBottomLeftCorner).toBe(true);
+                }
+            }
+        });
+
+        service.start();
+        roboJoe.startPlaying();
+
+        service.send({
+            type: 'REVEAL_NEXT_CELL',
+            row: 0,
+            col: 0,
+            playerName: 'Joe'
+        });
+        service.send({
+            type: 'REVEAL_NEXT_CELL',
+            row: 1,
+            col: 1,
+            playerName: 'Joe'
+        });
+    });
+
     it('should not try to reveal the match just discovered by its opponent', () => {
         const machine = createGameMachine({
             field: [
