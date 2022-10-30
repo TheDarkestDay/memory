@@ -28,6 +28,10 @@ type RestartEvent = {
   field: string[][];
 };
 
+type GameMachineOptions = {
+  checkScoreDelay?: number;
+};
+
 const REVEAL_CELL_ACTION = assign<GameContext>((context, event) => {
   const { row, col } = event as unknown as RevealNextCellEvent;
 
@@ -37,7 +41,7 @@ const REVEAL_CELL_ACTION = assign<GameContext>((context, event) => {
   };
 });
 
-export const createGameMachine = ({field, players}: GameStateConfig) => {
+export const createGameMachine = ({field, players}: GameStateConfig, { checkScoreDelay }: GameMachineOptions = { checkScoreDelay: 1_500 }) => {
   const scores = players.reduce((acc, playerName) => {
     return {
       ...acc,
@@ -94,7 +98,7 @@ export const createGameMachine = ({field, players}: GameStateConfig) => {
             return (callback) => {
               const timeoutHandle = setTimeout(() => {
                 callback('CHECK_SCORE');
-              }, 1_500);
+              }, checkScoreDelay);
 
               return () => clearTimeout(timeoutHandle);
             };
