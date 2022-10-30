@@ -41,10 +41,8 @@ export type Player = {
   name: string;
 };
 
-export type Game = {
+export type Game = GameFormValues & {
   id: string;
   service: GameService;
   players: Player[];
-  fieldSize: number;
-  theme: GameTheme;
 };
