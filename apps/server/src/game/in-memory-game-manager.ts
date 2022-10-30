@@ -73,7 +73,9 @@ export class InMemoryGameManager implements GameManager {
       const robot = new RobotPlayer(name, service);
 
       robot.addActionListener((revealCellAction) => {
-        service.send({type: 'REVEAL_NEXT_CELL', ...revealCellAction});
+        setTimeout(() => {
+          service.send({type: 'REVEAL_NEXT_CELL', ...revealCellAction});
+        }, 1_500);
       });
       robot.startPlaying();
     });
