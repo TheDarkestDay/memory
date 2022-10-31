@@ -3,6 +3,18 @@ import { interpret } from "xstate";
 
 import { RobotPlayer } from './robot-player';
 
+jest.mock('@memory/shared', () => {
+    const originalModule = jest.requireActual("@memory/shared");
+
+    return {
+        __esModule: true,
+        ...originalModule,
+        getRandomNumber: () => {
+            return 0;
+        }
+    };
+});
+
 const CHECK_SCORE_DELAY = 0;
 
 describe('RobotPlayer', () => {
@@ -299,5 +311,61 @@ describe('RobotPlayer', () => {
 
         service.start();
         roboJoe.startPlaying();
+    });
+
+    it('should not try to reveal already revealed cells', (done) => {
+        const machine = createGameMachine({
+            field: [
+                ['2', '3'],
+                ['1', '2']
+            ],
+            players: [
+                'Joe',
+                'Robo-Joe'
+            ]
+        }, { checkScoreDelay: CHECK_SCORE_DELAY });
+        const service = interpret(machine);
+
+        const roboJoe = new RobotPlayer('Robo-Joe', service);
+
+        const actionsListener = jest.fn().mockImplementation((event) => {
+            service.send({ type: 'REVEAL_NEXT_CELL', ...event });
+        });
+
+        roboJoe.addActionListener(actionsListener);
+
+        let turnsPassed = 0;
+        service.onTransition((state) => {
+            const { value } = state;
+
+            if (value === 'lookingForWinner') {
+                turnsPassed += 1;
+
+                if (turnsPassed === 2) {
+                    const robotActions = actionsListener.mock.calls.map(([action]) => action);
+                    const didRobotRevealTopLeftCorner = robotActions.some(([row, col]) => row === 0 && col === 0);
+
+                    expect(didRobotRevealTopLeftCorner).toEqual(false);
+
+                    done();
+                }
+            }
+        });
+
+        service.start();
+        roboJoe.startPlaying();
+
+        service.send({
+            type: 'REVEAL_NEXT_CELL',
+            row: 0,
+            col: 0,
+            playerName: 'Joe'
+        });
+        service.send({
+            type: 'REVEAL_NEXT_CELL',
+            row: 1,
+            col: 1,
+            playerName: 'Joe'
+        });
     });
 });

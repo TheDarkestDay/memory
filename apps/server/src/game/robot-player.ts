@@ -44,6 +44,10 @@ export class RobotPlayer {
             const cellAContent = field[rowA][colA];
             if (cellAContent === field[rowB][colB]) {
                 delete this.charactersLocations[cellAContent];
+
+
+            this.removeCellFromNotYetRevealedCells([rowA, colA]);
+            this.removeCellFromNotYetRevealedCells([rowB, colB]);
             }
         }
 
@@ -87,6 +91,14 @@ export class RobotPlayer {
 
     private notifyListeners(event: RevealNextCellEvent) {
         this.listeners.forEach((listener) => listener(event));
+    }
+
+    private removeCellFromNotYetRevealedCells([row, col]: [number, number]) {
+        const cellIndex = this.notYetRevealedCells.findIndex(([cellRow, cellCol]) => cellRow === row && cellCol === col);
+
+        if (cellIndex !== -1) {
+            this.notYetRevealedCells.splice(cellIndex, 1);
+        }
     }
 
     private stateChangeHandler = this.handleStateChange.bind(this);
