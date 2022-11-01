@@ -54,13 +54,16 @@ export class RobotPlayer {
                     .find((cells) => cells.length === 2);
 
                 if (foundMatch != null) {
-                    const [[row, col]] = foundMatch.slice(revealedCells.length);
+                    const [[row, col]] = foundMatch.filter(([matchingRow, matchingCol]) => {
+                        return revealedCells.every(([revealedRow, revealedCol]) => {
+                            return revealedRow !== matchingRow && revealedCol !== matchingCol;
+                        });
+                    });
 
                     this.notifyListeners({ playerName: this.name, row, col });
                 } else {
                     const randomPositionIndex = getRandomNumber(0, this.notYetRevealedCells.length - 1);
                     if (this.notYetRevealedCells.length === 0) {
-                        console.log('Not yet revealed cells are empty');
                         return;
                     }
 
