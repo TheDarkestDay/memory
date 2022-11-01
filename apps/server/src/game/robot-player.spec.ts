@@ -380,6 +380,64 @@ describe('RobotPlayer', () => {
         });
     });
 
+    it('should be able to complete a match discovered during its own turn even if the match is located in the same row', (done) => {
+        const machine = createGameMachine({
+            field: [
+                ['2', '2'],
+                ['1', '3']
+            ],
+            players: [
+                'Joe',
+                'Robo-Joe'
+            ]
+        }, { checkScoreDelay: CHECK_SCORE_DELAY });
+        const service = interpret(machine);
+
+        const roboJoe = new RobotPlayer('Robo-Joe', service);
+
+        const actionsListener = jest.fn().mockImplementation((event) => {
+            service.send({ type: 'REVEAL_NEXT_CELL', ...event });
+        });
+
+        roboJoe.addActionListener(actionsListener);
+
+        let turnsPassed = -1;
+        service.onTransition((state) => {
+            const { value } = state;
+            if (value === 'noCellsRevealed') {
+                turnsPassed += 1;
+            }
+
+            if (turnsPassed === 2) {
+                const robotActions = actionsListener.mock.calls.map(([action]) => action);
+
+                const didRobotRevealTopRightCorner = robotActions.some((action) => action.row === 0 && action.col === 1);
+                const didRobotRevealTopLeftCorner = robotActions.some((action) => action.row === 0 && action.col === 0);
+
+                expect(didRobotRevealTopRightCorner).toBe(true);
+                expect(didRobotRevealTopLeftCorner).toBe(true);
+
+                done();
+            }
+        });
+
+        service.start();
+        roboJoe.startPlaying();
+
+        service.send({
+            type: 'REVEAL_NEXT_CELL',
+            row: 0,
+            col: 0,
+            playerName: 'Joe'
+        });
+        service.send({
+            type: 'REVEAL_NEXT_CELL',
+            row: 1,
+            col: 0,
+            playerName: 'Joe'
+        });
+    });
+
     it('should not try to open the same matching cell multiple times during its turn', (done) => {
         const machine = createGameMachine({
             field: [

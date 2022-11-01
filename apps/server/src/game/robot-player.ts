@@ -54,9 +54,12 @@ export class RobotPlayer {
                     .find((cells) => cells.length === 2);
 
                 if (foundMatch != null) {
-                    const [[row, col]] = foundMatch.filter(([matchingRow, matchingCol]) => {
-                        return revealedCells.every(([revealedRow, revealedCol]) => {
-                            return revealedRow !== matchingRow && revealedCol !== matchingCol;
+                    const [[row, col]] = foundMatch.filter((matchingCell) => {
+                        return revealedCells.every((revealedCell) => {
+                            const revealedCellId = this.getCellId(revealedCell);
+                            const matchingCellId = this.getCellId(matchingCell);
+
+                            return revealedCellId !== matchingCellId;
                         });
                     });
 
@@ -92,6 +95,10 @@ export class RobotPlayer {
         this.listeners.push(listener);
     }
 
+    private getCellId([row, col]: [number, number]) {
+        return `${row}-${col}`;
+    }
+
     private notifyListeners(event: RevealNextCellEvent) {
         this.listeners.forEach((listener) => listener(event));
     }
@@ -109,9 +116,9 @@ export class RobotPlayer {
             this.charactersLocations[cellContent] = [];
         }
 
-        const isThisCellAlreadMemorized = this.charactersLocations[cellContent].some(([row, col]) => row === cellRow && col === cellCol);
+        const isThisCellAlreadyMemorized = this.charactersLocations[cellContent].some(([row, col]) => row === cellRow && col === cellCol);
 
-        if (!isThisCellAlreadMemorized) {
+        if (!isThisCellAlreadyMemorized) {
             this.charactersLocations[cellContent].push([cellRow, cellCol]);
         }
     }
