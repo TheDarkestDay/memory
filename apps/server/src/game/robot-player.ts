@@ -45,9 +45,8 @@ export class RobotPlayer {
             if (cellAContent === field[rowB][colB]) {
                 delete this.charactersLocations[cellAContent];
 
-
-            this.removeCellFromNotYetRevealedCells([rowA, colA]);
-            this.removeCellFromNotYetRevealedCells([rowB, colB]);
+                this.removeCellFromNotYetRevealedCells([rowA, colA]);
+                this.removeCellFromNotYetRevealedCells([rowB, colB]);
             }
         }
 

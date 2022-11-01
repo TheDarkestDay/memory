@@ -343,7 +343,7 @@ describe('RobotPlayer', () => {
 
                 if (turnsPassed === 2) {
                     const robotActions = actionsListener.mock.calls.map(([action]) => action);
-                    const didRobotRevealTopLeftCorner = robotActions.some(([row, col]) => row === 0 && col === 0);
+                    const didRobotRevealTopLeftCorner = robotActions.some(({row, col}) => row === 0 && col === 0);
 
                     expect(didRobotRevealTopLeftCorner).toEqual(false);
 
