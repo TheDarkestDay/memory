@@ -22,7 +22,7 @@ describe('RobotPlayer', () => {
         const machine = createGameMachine({
             field: [
                 ['1', '2'],
-                ['2', '1']
+                ['3', '4']
             ],
             players: [
                 'Joe',
@@ -32,6 +32,7 @@ describe('RobotPlayer', () => {
         const service = interpret(machine);
 
         const actionsListener = jest.fn().mockImplementation((event) => {
+            console.log('Robot trying to reveal cell', event);
             service.send({ type: 'REVEAL_NEXT_CELL', ...event });
         });
 
@@ -42,6 +43,7 @@ describe('RobotPlayer', () => {
         let turnsPassed = 0;
         service.onTransition((state) => {
             const { value } = state;
+            console.log('Moving into state', value);
 
             if (value === 'lookingForWinner') {
                 turnsPassed += 1;
@@ -225,8 +227,8 @@ describe('RobotPlayer', () => {
     it('should not try to reveal the match just discovered by its opponent', () => {
         const machine = createGameMachine({
             field: [
-                ['1', '2'],
-                ['2', '3']
+                ['2', '3'],
+                ['1', '2']
             ],
             players: [
                 'Joe',
@@ -253,11 +255,11 @@ describe('RobotPlayer', () => {
             if (turnsPassed === 2) {
                 const robotActions = actionsListener.mock.calls.map(([action]) => action);
 
-                const didRobotRevealTopLeftCorner = robotActions.some((action) => action.row === 0 && action.col === 0);
-                const didRobotRevealBottomRightCorner = robotActions.some((action) => action.row === 1 && action.col === 1);
+                const didRobotRevealTopRightCorner = robotActions.some((action) => action.row === 0 && action.col === 1);
+                const didRobotRevealBottomLeftCorner = robotActions.some((action) => action.row === 1 && action.col === 0);
 
-                expect(didRobotRevealTopLeftCorner).toBe(true);
-                expect(didRobotRevealBottomRightCorner).toBe(true);
+                expect(didRobotRevealTopRightCorner).toBe(true);
+                expect(didRobotRevealBottomLeftCorner).toBe(true);
             }
         });
 
@@ -267,13 +269,13 @@ describe('RobotPlayer', () => {
         service.send({
             type: 'REVEAL_NEXT_CELL',
             row: 0,
-            col: 1,
+            col: 0,
             playerName: 'Joe'
         });
         service.send({
             type: 'REVEAL_NEXT_CELL',
             row: 1,
-            col: 0,
+            col: 1,
             playerName: 'Joe'
         });
     });
@@ -313,11 +315,12 @@ describe('RobotPlayer', () => {
         roboJoe.startPlaying();
     });
 
-    it('should not try to reveal already revealed cells', (done) => {
+    it('should not try to open the same matching cell multiple times during its turn', (done) => {
         const machine = createGameMachine({
             field: [
-                ['2', '3'],
-                ['1', '2']
+                ['2', '3', '4'],
+                ['1', '5', '6'],
+                ['7', '8', '2']
             ],
             players: [
                 'Joe',
@@ -342,10 +345,43 @@ describe('RobotPlayer', () => {
                 turnsPassed += 1;
 
                 if (turnsPassed === 2) {
-                    const robotActions = actionsListener.mock.calls.map(([action]) => action);
-                    const didRobotRevealTopLeftCorner = robotActions.some(({row, col}) => row === 0 && col === 0);
+                    service.send({
+                        type: 'REVEAL_NEXT_CELL',
+                        row: 0,
+                        col: 0,
+                        playerName: 'Joe'
+                    });
+                    service.send({
+                        type: 'REVEAL_NEXT_CELL',
+                        row: 1,
+                        col: 1,
+                        playerName: 'Joe'
+                    });
+                }
 
-                    expect(didRobotRevealTopLeftCorner).toEqual(false);
+                if (turnsPassed === 4) {
+                    service.send({
+                        type: 'REVEAL_NEXT_CELL',
+                        row: 1,
+                        col: 1,
+                        playerName: 'Joe'
+                    });
+                    service.send({
+                        type: 'REVEAL_NEXT_CELL',
+                        row: 2,
+                        col: 2,
+                        playerName: 'Joe'
+                    });
+                }
+
+                if (turnsPassed === 6) {
+                    const robotActions = actionsListener.mock.calls.map(([action]) => action);
+
+                    const topLeftCornerRevealedTimes = robotActions.filter(({row, col}) => row === 0 && col === 0 ).length;
+                    const bottomRightCornerRevealedTimes = robotActions.filter(({row, col}) => row === 2 && col === 2).length;
+
+                    expect(topLeftCornerRevealedTimes === 1).toEqual(true);
+                    expect(bottomRightCornerRevealedTimes === 1).toEqual(true);
 
                     done();
                 }

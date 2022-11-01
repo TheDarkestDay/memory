@@ -31,56 +31,57 @@ export class RobotPlayer {
     private handleStateChange(state: State<GameContext, AnyEventObject>) {
         const { value } = state;
 
-        if (value === 'finished' || value === 'lookingForWinner') {
-            return;
-        }
-
         const { context } = state;
         const { currentPlayer, revealedCells, field } = context;
 
-        if (value === 'secondCellRevealed') {
-            const [[rowA, colA], [rowB, colB]] = revealedCells;
-
-            const cellAContent = field[rowA][colA];
-            if (cellAContent === field[rowB][colB]) {
-                delete this.charactersLocations[cellAContent];
-
-                this.removeCellFromNotYetRevealedCells([rowA, colA]);
-                this.removeCellFromNotYetRevealedCells([rowB, colB]);
-            }
-        }
-
-        if (currentPlayer !== this.name) {
-            const lastRevealedCell = revealedCells[revealedCells.length - 1];
-            if (lastRevealedCell == null) {
-                return;
-            }
-
+        const lastRevealedCell = revealedCells[revealedCells.length - 1];
+        if (lastRevealedCell != null) {
             const [row, col] = lastRevealedCell;
             const cellContent = field[row][col];
 
-            if (this.charactersLocations[cellContent] == null) {
-                this.charactersLocations[cellContent] = [];
-            }
+            this.memorizeCharacterLocation(cellContent, lastRevealedCell);
+            this.removeCellFromNotYetRevealedCells(lastRevealedCell);
+        }
 
-            this.charactersLocations[cellContent].push(lastRevealedCell);
-        } else {
-            const foundMatch = Object.values(this.charactersLocations)
-                .find((cells) => cells.length === 2);
-
-            if (foundMatch != null) {
-                const [[row, col]] = foundMatch.slice(revealedCells.length);
-
-                this.notifyListeners({ playerName: this.name, row, col });
-            } else {
-                const randomPositionIndex = getRandomNumber(0, this.notYetRevealedCells.length - 1);
-                if (this.notYetRevealedCells.length === 0) {
+        switch (value) {
+            case 'firstCellRevealed':
+            case 'noCellsRevealed': {
+                if (currentPlayer !== this.name) {
                     return;
                 }
 
-                const [[row, col]] = this.notYetRevealedCells.splice(randomPositionIndex, 1);
-                this.notifyListeners({ playerName: this.name, row, col });
+                const foundMatch = Object.values(this.charactersLocations)
+                    .find((cells) => cells.length === 2);
+
+                if (foundMatch != null) {
+                    const [[row, col]] = foundMatch.slice(revealedCells.length);
+
+                    this.notifyListeners({ playerName: this.name, row, col });
+                } else {
+                    const randomPositionIndex = getRandomNumber(0, this.notYetRevealedCells.length - 1);
+                    if (this.notYetRevealedCells.length === 0) {
+                        console.log('Not yet revealed cells are empty');
+                        return;
+                    }
+
+                    const [[row, col]] = this.notYetRevealedCells.splice(randomPositionIndex, 1);
+                    this.notifyListeners({ playerName: this.name, row, col });
+                }
+                break;
             }
+            case 'secondCellRevealed': {
+                const [[rowA, colA]] = revealedCells;
+                const [rowB, colB] = lastRevealedCell;
+
+                const cellAContent = field[rowA][colA];
+                if (cellAContent === field[rowB][colB]) {
+                    delete this.charactersLocations[cellAContent];
+                }
+
+                return;
+            }
+            default:
+                return;
         }
     }
 
@@ -97,6 +98,18 @@ export class RobotPlayer {
 
         if (cellIndex !== -1) {
             this.notYetRevealedCells.splice(cellIndex, 1);
+        }
+    }
+
+    private memorizeCharacterLocation(cellContent: string, [cellRow, cellCol]: [number, number]) {
+        if (this.charactersLocations[cellContent] == null) {
+            this.charactersLocations[cellContent] = [];
+        }
+
+        const isThisCellAlreadMemorized = this.charactersLocations[cellContent].some(([row, col]) => row === cellRow && col === cellCol);
+
+        if (!isThisCellAlreadMemorized) {
+            this.charactersLocations[cellContent].push([cellRow, cellCol]);
         }
     }
 
