@@ -39,11 +39,11 @@ describe('RobotPlayer', () => {
 
         roboJoe.addActionListener(actionsListener);
 
-        let turnsPassed = 0;
+        let turnsPassed = -1;
         service.onTransition((state) => {
             const { value } = state;
 
-            if (value === 'lookingForWinner') {
+            if (value === 'noCellsRevealed') {
                 turnsPassed += 1;
 
                 if (turnsPassed === 2) {
@@ -99,11 +99,11 @@ describe('RobotPlayer', () => {
 
         roboJoe.addActionListener(actionsListener);
 
-        let turnsPassed = 0;
+        let turnsPassed = -1;
         service.onTransition((state) => {
             const { value } = state;
 
-            if (value === 'lookingForWinner') {
+            if (value === 'noCellsRevealed') {
                 turnsPassed += 1;
 
                 if (turnsPassed === 2) {
@@ -174,11 +174,11 @@ describe('RobotPlayer', () => {
 
         roboJoe.addActionListener(actionsListener);
 
-        let turnsPassed = 0;
+        let turnsPassed = -1;
         service.onTransition((state) => {
             const { value } = state;
 
-            if (value === 'lookingForWinner') {
+            if (value === 'noCellsRevealed') {
                 turnsPassed += 1;
 
                 if (turnsPassed === 2) {
@@ -227,7 +227,7 @@ describe('RobotPlayer', () => {
         });
     });
 
-    xit('should not try to reveal the match just discovered by its opponent', (done) => {
+    it('should not try to reveal the match just discovered by its opponent', (done) => {
         const machine = createGameMachine({
             field: [
                 ['2', '3'],
@@ -248,10 +248,10 @@ describe('RobotPlayer', () => {
 
         roboJoe.addActionListener(actionsListener);
 
-        let turnsPassed = 0;
+        let turnsPassed = -1;
         service.onTransition((state) => {
             const { value } = state;
-            if (value === 'lookingForWinner') {
+            if (value === 'noCellsRevealed') {
                 turnsPassed += 1;
             }
 
@@ -322,7 +322,7 @@ describe('RobotPlayer', () => {
         roboJoe.startPlaying();
     });
 
-    xit('should be able to complete a match discovered during its own turn', (done) => {
+    it('should be able to complete a match discovered during its own turn', (done) => {
         const machine = createGameMachine({
             field: [
                 ['1', '2'],
@@ -343,10 +343,10 @@ describe('RobotPlayer', () => {
 
         roboJoe.addActionListener(actionsListener);
 
-        let turnsPassed = 0;
+        let turnsPassed = -1;
         service.onTransition((state) => {
             const { value } = state;
-            if (value === 'lookingForWinner') {
+            if (value === 'noCellsRevealed') {
                 turnsPassed += 1;
             }
 
@@ -374,13 +374,13 @@ describe('RobotPlayer', () => {
         });
         service.send({
             type: 'REVEAL_NEXT_CELL',
-            row: 0,
-            col: 1,
+            row: 1,
+            col: 0,
             playerName: 'Joe'
         });
     });
 
-    xit('should not try to open the same matching cell multiple times during its turn', (done) => {
+    it('should not try to open the same matching cell multiple times during its turn', (done) => {
         const machine = createGameMachine({
             field: [
                 ['2', '3', '4'],
@@ -402,11 +402,11 @@ describe('RobotPlayer', () => {
 
         roboJoe.addActionListener(actionsListener);
 
-        let turnsPassed = 0;
+        let turnsPassed = -1;
         service.onTransition((state) => {
             const { value } = state;
 
-            if (value === 'lookingForWinner') {
+            if (value === 'noCellsRevealed') {
                 turnsPassed += 1;
 
                 if (turnsPassed === 2) {
