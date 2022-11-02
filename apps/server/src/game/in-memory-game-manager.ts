@@ -72,7 +72,7 @@ export class InMemoryGameManager implements GameManager {
       this.emit(gameId, 'gameStateChange', this.buildGameDataFromState(state));
     });
 
-    robotPlayers.forEach(({name}) => {
+    const robots = robotPlayers.map(({name}) => {
       const robot = new InfiniteMemoryRobot(name, service);
 
       robot.addActionListener((revealCellAction) => {
@@ -81,12 +81,14 @@ export class InMemoryGameManager implements GameManager {
         }, ROBOT_ACTIONS_DELAY);
       });
       robot.startPlaying();
+
+      return robot;
     });
 
     service.start();
 
     targetGame.service = service;
-    targetGame.robots = robotPlayers;
+    targetGame.robots = robots;
   }
 
   restartGame(gameId: string): void {
