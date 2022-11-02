@@ -527,4 +527,81 @@ describe('RobotPlayer', () => {
             playerName: 'Joe'
         });
     });
+
+    fit('should choose to complete one full match even if more are avaiable now', (done) => {
+        const machine = createGameMachine({
+            field: [
+                ['2', '3'],
+                ['2', '3']
+            ],
+            players: [
+                'Joe',
+                'Alice',
+                'Robo-Joe'
+            ]
+        }, { checkScoreDelay: CHECK_SCORE_DELAY });
+        const service = interpret(machine);
+
+        const roboJoe = new RobotPlayer('Robo-Joe', service);
+
+        const actionsListener = jest.fn().mockImplementation((event) => {
+            service.send({ type: 'REVEAL_NEXT_CELL', ...event });
+        });
+
+        roboJoe.addActionListener(actionsListener);
+
+        let turnsPassed = -1;
+        service.onTransition((state) => {
+            const { value } = state;
+
+            if (value === 'noCellsRevealed') {
+                turnsPassed += 1;
+
+                if (turnsPassed === 1) {
+                    service.send({
+                        type: 'REVEAL_NEXT_CELL',
+                        row: 0,
+                        col: 1,
+                        playerName: 'Alice'
+                    });
+                    service.send({
+                        type: 'REVEAL_NEXT_CELL',
+                        row: 1,
+                        col: 0,
+                        playerName: 'Alice'
+                    });
+                }
+
+                if (turnsPassed === 3) {
+                    const robotActions = actionsListener.mock.calls.map(([action]) => action);
+                    const [{row: firstRow, col: firstCol}, {row: secondRow, col: secondCol}] = robotActions;
+
+                    const { field } = state.context;
+
+                    const firstRevealedCharacter = field[firstRow][firstCol];
+                    const secondRevealedCharacter = field[secondRow][secondCol];
+
+                    expect(firstRevealedCharacter).toEqual(secondRevealedCharacter);
+
+                    done();
+                }
+            }
+        });
+
+        service.start();
+        roboJoe.startPlaying();
+
+        service.send({
+            type: 'REVEAL_NEXT_CELL',
+            row: 1,
+            col: 1,
+            playerName: 'Joe'
+        });
+        service.send({
+            type: 'REVEAL_NEXT_CELL',
+            row: 0,
+            col: 0,
+            playerName: 'Joe'
+        });
+    });
 });
