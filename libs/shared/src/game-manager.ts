@@ -1,4 +1,5 @@
 import { GameData, GameService } from './game-machine';
+import { RobotPlayer } from './robot-player';
 
 export type GameTheme = 'numbers' | 'emojis';
 
@@ -45,4 +46,5 @@ export type Game = GameFormValues & {
   id: string;
   service: GameService;
   players: Player[];
+  robots: RobotPlayer[];
 };

@@ -1,7 +1,7 @@
 import { createGameMachine } from "@memory/shared";
 import { interpret } from "xstate";
 
-import { RobotPlayer } from './robot-player';
+import { InfiniteMemoryRobot } from './infinite-memory-robot';
 
 jest.mock('@memory/shared', () => {
     const originalModule = jest.requireActual("@memory/shared");
@@ -17,7 +17,7 @@ jest.mock('@memory/shared', () => {
 
 const CHECK_SCORE_DELAY = 0;
 
-describe('RobotPlayer', () => {
+describe('InfiniteMemoryRobot', () => {
     it('should reveal new cells if no matches have been discovered', (done) => {
         const machine = createGameMachine({
             field: [
@@ -35,7 +35,7 @@ describe('RobotPlayer', () => {
             service.send({ type: 'REVEAL_NEXT_CELL', ...event });
         });
 
-        const roboJoe = new RobotPlayer('Robo-Joe', service);
+        const roboJoe = new InfiniteMemoryRobot('Robo-Joe', service);
 
         roboJoe.addActionListener(actionsListener);
 
@@ -91,7 +91,7 @@ describe('RobotPlayer', () => {
         }, { checkScoreDelay: CHECK_SCORE_DELAY });
         const service = interpret(machine);
 
-        const roboJoe = new RobotPlayer('Robo-Joe', service);
+        const roboJoe = new InfiniteMemoryRobot('Robo-Joe', service);
 
         const actionsListener = jest.fn().mockImplementation((event) => {
             service.send({ type: 'REVEAL_NEXT_CELL', ...event });
@@ -166,7 +166,7 @@ describe('RobotPlayer', () => {
         }, { checkScoreDelay: CHECK_SCORE_DELAY });
         const service = interpret(machine);
 
-        const roboJoe = new RobotPlayer('Robo-Joe', service);
+        const roboJoe = new InfiniteMemoryRobot('Robo-Joe', service);
 
         const actionsListener = jest.fn().mockImplementation((event) => {
             service.send({ type: 'REVEAL_NEXT_CELL', ...event });
@@ -240,7 +240,7 @@ describe('RobotPlayer', () => {
         }, { checkScoreDelay: CHECK_SCORE_DELAY });
         const service = interpret(machine);
 
-        const roboJoe = new RobotPlayer('Robo-Joe', service);
+        const roboJoe = new InfiniteMemoryRobot('Robo-Joe', service);
 
         const actionsListener = jest.fn().mockImplementation((event) => {
             service.send({ type: 'REVEAL_NEXT_CELL', ...event });
@@ -298,7 +298,7 @@ describe('RobotPlayer', () => {
         });
         const service = interpret(machine);
 
-        const roboJoe = new RobotPlayer('Robo-Joe', service);
+        const roboJoe = new InfiniteMemoryRobot('Robo-Joe', service);
 
         const actionsListener = jest.fn().mockImplementation((event) => {
             service.send({ type: 'REVEAL_NEXT_CELL', ...event });
@@ -335,7 +335,7 @@ describe('RobotPlayer', () => {
         }, { checkScoreDelay: CHECK_SCORE_DELAY });
         const service = interpret(machine);
 
-        const roboJoe = new RobotPlayer('Robo-Joe', service);
+        const roboJoe = new InfiniteMemoryRobot('Robo-Joe', service);
 
         const actionsListener = jest.fn().mockImplementation((event) => {
             service.send({ type: 'REVEAL_NEXT_CELL', ...event });
@@ -380,6 +380,87 @@ describe('RobotPlayer', () => {
         });
     });
 
+    it('should be able to play a new game after reset', (done) => {
+        const field = [
+            ['1', '2'],
+            ['2', '1']
+        ];
+        const machine = createGameMachine({
+            field,
+            players: [
+                'Joe',
+                'Robo-Joe'
+            ]
+        }, { checkScoreDelay: CHECK_SCORE_DELAY });
+        const service = interpret(machine);
+
+        const roboJoe = new InfiniteMemoryRobot('Robo-Joe', service);
+
+        const actionsListener = jest.fn().mockImplementation((event) => {
+            service.send({ type: 'REVEAL_NEXT_CELL', ...event });
+        });
+
+        roboJoe.addActionListener(actionsListener);
+
+        let wasGameRestarted = false;
+        service.onTransition((state) => {
+            const { value, context } = state;
+            const { currentPlayer } = context;
+
+            if (wasGameRestarted && value === 'noCellsRevealed' && currentPlayer === 'Joe') {
+                service.send({
+                    type: 'REVEAL_NEXT_CELL',
+                    row: 0,
+                    col: 0,
+                    playerName: 'Joe'
+                });
+                service.send({
+                    type: 'REVEAL_NEXT_CELL',
+                    row: 1,
+                    col: 1,
+                    playerName: 'Joe'
+                });
+            }
+
+            if (value === 'finished') {
+                if (wasGameRestarted) {
+                    const robotActions = actionsListener.mock.calls
+                        .slice(2)
+                        .map(([action]) => action);
+
+                    const didRobotRevealTopRightCorner = robotActions.some((action) => action.row === 0 && action.col === 1);
+                    const didRobotRevealBottomLeftCorner = robotActions.some((action) => action.row === 1 && action.col === 0);
+
+                    expect(didRobotRevealTopRightCorner).toBe(true);
+                    expect(didRobotRevealBottomLeftCorner).toBe(true);
+
+                    done();
+                } else {
+                    roboJoe.reset();
+                    service.send({ type: 'RESTART', field });
+
+                    wasGameRestarted = true;
+                }
+            }
+        });
+
+        service.start();
+        roboJoe.startPlaying();
+
+        service.send({
+            type: 'REVEAL_NEXT_CELL',
+            row: 0,
+            col: 0,
+            playerName: 'Joe'
+        });
+        service.send({
+            type: 'REVEAL_NEXT_CELL',
+            row: 1,
+            col: 1,
+            playerName: 'Joe'
+        });
+    });
+
     it('should be able to complete a match discovered during its own turn even if the match is located in the same row', (done) => {
         const machine = createGameMachine({
             field: [
@@ -393,7 +474,7 @@ describe('RobotPlayer', () => {
         }, { checkScoreDelay: CHECK_SCORE_DELAY });
         const service = interpret(machine);
 
-        const roboJoe = new RobotPlayer('Robo-Joe', service);
+        const roboJoe = new InfiniteMemoryRobot('Robo-Joe', service);
 
         const actionsListener = jest.fn().mockImplementation((event) => {
             service.send({ type: 'REVEAL_NEXT_CELL', ...event });
@@ -452,7 +533,7 @@ describe('RobotPlayer', () => {
         }, { checkScoreDelay: CHECK_SCORE_DELAY });
         const service = interpret(machine);
 
-        const roboJoe = new RobotPlayer('Robo-Joe', service);
+        const roboJoe = new InfiniteMemoryRobot('Robo-Joe', service);
 
         const actionsListener = jest.fn().mockImplementation((event) => {
             service.send({ type: 'REVEAL_NEXT_CELL', ...event });
@@ -500,8 +581,8 @@ describe('RobotPlayer', () => {
                 if (turnsPassed === 6) {
                     const robotActions = actionsListener.mock.calls.map(([action]) => action);
 
-                    const topLeftCornerRevealedTimes = robotActions.filter(({row, col}) => row === 0 && col === 0 ).length;
-                    const bottomRightCornerRevealedTimes = robotActions.filter(({row, col}) => row === 2 && col === 2).length;
+                    const topLeftCornerRevealedTimes = robotActions.filter(({ row, col }) => row === 0 && col === 0).length;
+                    const bottomRightCornerRevealedTimes = robotActions.filter(({ row, col }) => row === 2 && col === 2).length;
 
                     expect(topLeftCornerRevealedTimes === 1).toEqual(true);
                     expect(bottomRightCornerRevealedTimes === 1).toEqual(true);
@@ -542,7 +623,7 @@ describe('RobotPlayer', () => {
         }, { checkScoreDelay: CHECK_SCORE_DELAY });
         const service = interpret(machine);
 
-        const roboJoe = new RobotPlayer('Robo-Joe', service);
+        const roboJoe = new InfiniteMemoryRobot('Robo-Joe', service);
 
         const actionsListener = jest.fn().mockImplementation((event) => {
             service.send({ type: 'REVEAL_NEXT_CELL', ...event });
@@ -574,7 +655,7 @@ describe('RobotPlayer', () => {
 
                 if (turnsPassed === 3) {
                     const robotActions = actionsListener.mock.calls.map(([action]) => action);
-                    const [{row: firstRow, col: firstCol}, {row: secondRow, col: secondCol}] = robotActions;
+                    const [{ row: firstRow, col: firstCol }, { row: secondRow, col: secondCol }] = robotActions;
 
                     const { field } = state.context;
 

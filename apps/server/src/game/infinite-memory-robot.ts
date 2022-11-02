@@ -1,13 +1,26 @@
-import { GameContext, GameService, getRandomNumber, RevealNextCellEvent } from "@memory/shared";
+import { GameContext, GameService, getRandomNumber, RevealNextCellEvent, ActionListener, RobotPlayer } from "@memory/shared";
 import { State, AnyEventObject } from "xstate";
 
-type ActionListener = (event: RevealNextCellEvent) => void;
-
-export class RobotPlayer {
+export class InfiniteMemoryRobot implements RobotPlayer {
     constructor(private name: string, private gameService: GameService) {
     }
 
     startPlaying() {
+        this.generateNotYetRevealedCells();
+        this.gameService.onTransition(this.stateChangeHandler);
+    }
+
+    dispose() {
+        this.gameService.off(this.stateChangeHandler);
+        this.listeners = [];
+    }
+
+    reset() {
+        this.charactersLocations = {};
+        this.generateNotYetRevealedCells();
+    }
+
+    private generateNotYetRevealedCells() {
         const { field } = this.gameService.getSnapshot().context;
         const rowsCount = field.length;
         const colsCount = field[0].length;
@@ -19,13 +32,6 @@ export class RobotPlayer {
                 this.notYetRevealedCells.push([i, j]);
             }
         }
-
-        this.gameService.onTransition(this.stateChangeHandler);
-    }
-
-    dispose() {
-        this.gameService.off(this.stateChangeHandler);
-        this.listeners = [];
     }
 
     private handleStateChange(state: State<GameContext, AnyEventObject>) {

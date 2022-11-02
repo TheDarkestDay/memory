@@ -3,7 +3,7 @@ import { GameManager, Game, createGameMachine, GameContext, GameFormValues, Game
 import { AnyEventObject, interpret, State } from 'xstate';
 import { uniqueNamesGenerator, adjectives, animals } from 'unique-names-generator';
 import { gameFieldFactory, GameFieldFactory } from './game-field-factory';
-import { RobotPlayer } from './robot-player';
+import { InfiniteMemoryRobot } from './infinite-memory-robot';
 
 const generateUniqueName = () => {
   return uniqueNamesGenerator({
@@ -11,6 +11,8 @@ const generateUniqueName = () => {
     separator: ' '
   });
 };
+
+const ROBOT_ACTIONS_DELAY = 1_500;
 
 export class InMemoryGameManager implements GameManager {
   private games: Game[] = [];
@@ -25,6 +27,7 @@ export class InMemoryGameManager implements GameManager {
       id: randomUUID(),
       service: null,
       players: [],
+      robots: [],
       theme,
       fieldSize,
       playersCount
@@ -70,12 +73,12 @@ export class InMemoryGameManager implements GameManager {
     });
 
     robotPlayers.forEach(({name}) => {
-      const robot = new RobotPlayer(name, service);
+      const robot = new InfiniteMemoryRobot(name, service);
 
       robot.addActionListener((revealCellAction) => {
         setTimeout(() => {
           service.send({type: 'REVEAL_NEXT_CELL', ...revealCellAction});
-        }, 1_500);
+        }, ROBOT_ACTIONS_DELAY);
       });
       robot.startPlaying();
     });
@@ -83,6 +86,7 @@ export class InMemoryGameManager implements GameManager {
     service.start();
 
     targetGame.service = service;
+    targetGame.robots = robotPlayers;
   }
 
   restartGame(gameId: string): void {
@@ -96,7 +100,9 @@ export class InMemoryGameManager implements GameManager {
       throw new Error(`Failed to restart game with id ${gameId} because it has not been created`);
     }
 
-    const { service, theme } = targetGame;
+    const { service, theme, robots } = targetGame;
+
+    robots.forEach((robot) => robot.reset());
     
     const snapshot = service.getSnapshot();
     const { field } = snapshot.context;
