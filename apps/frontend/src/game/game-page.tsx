@@ -25,7 +25,18 @@ const styles = {
     marginBottom: '6rem'
   }),
   controls: css({
-    marginLeft: 'auto'
+    display: 'none',
+    marginLeft: 'auto',
+    '@media (min-width: 768px)': {
+      display: 'flex'
+    }
+  }),
+  menuButton: css({
+    display: 'block',
+    marginLeft: 'auto',
+    '@media (min-width: 768px)': {
+      display: 'none'
+    }
   })
 };
 
@@ -81,6 +92,10 @@ export const GamePage = () => {
             New Game
           </Button>
         </FlexRow>
+
+        <Button onClick={() => {}} variant="primary" styles={styles.menuButton}>
+          Menu
+        </Button>
       </FlexRow>
 
       <section css={styles.fieldSection}>

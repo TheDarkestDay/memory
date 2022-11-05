@@ -10,8 +10,12 @@ type Props = {
 const styles = {
   grid: css({
     display: 'grid',
+    margin: '0 auto',
     gap: '1.25rem',
-    justifyContent: 'center',
+    width: '100%',
+    '@media (min-width: 768px)': {
+      width: '35.75rem'
+    }
   })
 };
 
@@ -31,8 +35,11 @@ export const GameField = ({state}: Props) => {
   }
 
   const gridStyles = css(styles.grid, {
-    gridTemplateColumns: `repeat(${field.length}, 6rem)`,
-    gridTemplateRows: `repeat(${field.length}, 6rem)`,
+    gridTemplateColumns: `repeat(${field.length}, 1fr)`,
+    gridTemplateRows: `repeat(${field.length}, 2.875rem)`,
+    '@media (min-width: 768px)': {
+      gridTemplateRows: `repeat(${field.length}, 5.75rem)`
+    }
   })
 
   return (

@@ -13,10 +13,13 @@ type Props = {
 
 const styles = {
   root: css({
-    fontSize: '44px',
+    fontSize: '1rem',
     borderRadius: '100%',
     border: 'none',
-    backgroundColor: '#bcced9'
+    backgroundColor: '#bcced9',
+    '@media (min-width: 768px)': {
+      fontSize: '2.75rem',
+    }
   })
 };
 
