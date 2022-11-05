@@ -48,11 +48,15 @@ export class InMemoryGameManager implements GameManager {
       const robotPlayersCount = playersCount - players.length;
 
       for (let i = 0; i < robotPlayersCount; i++) {
-        const robotPlayerName = `${generateUniqueName()}  🤖`;
+        const robotPlayerName = generateUniqueName();
+        const [, animal] = robotPlayerName.split(' ');
+        const shortName = `${getAnimalEmoji(animal)}🤖`;
+        const name = `${robotPlayerName} 🤖`;
         
         robotPlayers.push({
           id: robotPlayerName,
-          name: robotPlayerName,
+          name,
+          shortName 
         });
       }
     }

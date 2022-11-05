@@ -5,6 +5,7 @@ import { css } from '@emotion/react';
 import { FlexRow } from '../layout';
 
 import { trpc } from '../trpc';
+import { useMediaQuery } from '../common/use-media-query';
 
 const styles = {
   root: css({
@@ -65,6 +66,8 @@ export const PlayersList = ({ activePlayerName, scores = {} }: Props) => {
   const { gameId = '' } = useParams();
   const [players, setPlayers] = useState<Player[]>([]);
 
+  const isSmallScreen = useMediaQuery('(max-width: 768px)');
+
   trpc.useSubscription(['joinedPlayersChange', { gameId }], {
     onNext(joinedPlayers) {
       setPlayers(joinedPlayers);
@@ -84,7 +87,7 @@ export const PlayersList = ({ activePlayerName, scores = {} }: Props) => {
             key={player.id}
             css={playerStyles}
           >
-            <span css={styles.name}>{player.name}</span>
+            <span css={styles.name}>{isSmallScreen ? player.shortName : player.name}</span>
             <span css={styles.score}>{scores[player.name] ?? 0}</span>
           </li>
         );
