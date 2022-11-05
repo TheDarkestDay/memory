@@ -40,6 +40,7 @@ export interface GameManager {
 export type Player = {
   id: string;
   name: string;
+  shortName: string;
 };
 
 export type Game = GameFormValues & {

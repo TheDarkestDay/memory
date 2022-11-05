@@ -14,11 +14,25 @@ const styles = {
     listStyleType: 'none',
   }),
   player: css({
-    minWidth: '15rem',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexGrow: '1',
     padding: '1.5rem 1rem',
     backgroundColor: '#dfe7ec',
     '--name-color': '#7191a5',
     '--score-color': '#304859',
+    '@media (min-width: 768px)': {
+      alignItems: 'flex-start'
+    },
+    '@media (min-width: 1024px)': {
+      flexGrow: '0',
+      minWidth: '15rem',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    }
   }),
   activePlayer: css({
     backgroundColor: '#fda214',
@@ -27,12 +41,18 @@ const styles = {
   }),
   name: css({
     color: 'var(--name-color)',
-    fontSize: '1.25rem',
+    fontSize: '0.9375rem',
     fontWeight: 'bold',
+    '@media (min-width: 1024px)': {
+      fontSize: '1.25rem'
+    }
   }),
   score: css({
     color: 'var(--score-color)',
-    fontSize: '2rem',
+    fontSize: '1.5rem',
+    '@media (min-width: 1024px)': {
+      fontSize: '2rem'
+    },
   }),
 };
 
@@ -60,15 +80,13 @@ export const PlayersList = ({ activePlayerName, scores = {} }: Props) => {
         );
 
         return (
-          <FlexRow
-            component="li"
+          <li
             key={player.id}
-            justifyContent="space-between"
-            styles={playerStyles}
+            css={playerStyles}
           >
             <span css={styles.name}>{player.name}</span>
             <span css={styles.score}>{scores[player.name] ?? 0}</span>
-          </FlexRow>
+          </li>
         );
       })}
     </FlexRow>

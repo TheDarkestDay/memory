@@ -1,16 +1,9 @@
 import { randomUUID, randomBytes } from 'crypto';
 import { GameManager, Game, createGameMachine, GameContext, GameFormValues, GameEvent, GameEventsMap, GameEventsPayloadMap, Player, GameData, GamePhase } from '@memory/shared';
 import { AnyEventObject, interpret, State } from 'xstate';
-import { uniqueNamesGenerator, adjectives, animals } from 'unique-names-generator';
 import { gameFieldFactory, GameFieldFactory } from './game-field-factory';
 import { InfiniteMemoryRobot } from './infinite-memory-robot';
-
-const generateUniqueName = () => {
-  return uniqueNamesGenerator({
-    dictionaries: [adjectives, animals],
-    separator: ' '
-  });
-};
+import { generateUniqueName, getAnimalEmoji } from './player-names';  
 
 const ROBOT_ACTIONS_DELAY = 1_500;
 
@@ -121,10 +114,13 @@ export class InMemoryGameManager implements GameManager {
     }
 
     const playerName = generateUniqueName();
+    const [, animalName] = playerName.split(' ');
+    const shortName = getAnimalEmoji(animalName);
 
     const newPlayer = {
       id: randomBytes(8).toString('hex'),
-      name: playerName
+      name: playerName,
+      shortName,
     };
 
     targetGame.players.push(newPlayer);
