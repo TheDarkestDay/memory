@@ -13,39 +13,62 @@ const styles = {
     alignItems: 'center',
     flexDirection: 'column',
     backgroundColor: '#304859',
+    paddingLeft: '1.5rem',
+    paddingRight: '1.5rem',
+    '@media (min-width: 768px)': {
+      paddingLeft: '0',
+      paddingRight: '0',
+    }
   }),
   title: css({
     color: '#fcfcfc',
-    marginBottom: '78px',
+    marginBottom: '2.815rem',
+    '@media (min-width: 768px)': {
+      marginBottom: '4.875rem'
+    }
   }),
   form: css({
     backgroundColor: '#fcfcfc',
     borderRadius: '20px',
-    padding: '56px',
-    minWidth: '40.625rem'
+    padding: '1.5rem',
+    width: '100%',
+    maxWidth: '40.625rem',
+    '@media (min-width: 768px)': {
+      padding: '3.5rem'
+    }
   }),
   fieldSet: css({
-    marginBottom: '33px',
+    marginBottom: '1.5rem',
     border: 'none',
+    'media (min-width: 768px)': {
+      marginBottom: '2rem'
+    }
   }),
   fieldSetTitle: css({
     color: '#7191a5',
-    fontSize: '20px',
+    fontSize: '15px',
     fontWeight: 'bold',
-    marginBottom: '16px',
+    marginBottom: '0.75rem',
+    '@media (min-width: 768px)': {
+      fontSize: '20px',
+      marginBottom: '1rem'
+    }
   }),
   chip: css({
     display: 'block',
     textAlign: 'center',
     backgroundColor: '#bcced9',
     color: '#fcfcfc',
-    paddingTop: '10px',
-    paddingBottom: '10px',
+    paddingTop: '0.625rem',
+    paddingBottom: '0.625rem',
     borderRadius: '26px',
-    fontSize: '26px',
+    fontSize: '1rem',
     fontWeight: 'bold',
     'input:checked + &': {
       backgroundColor: '#304859',
+    },
+    '@media (min-width: 768px)': {
+      fontSize: '1.625rem'
     }
   })
 };

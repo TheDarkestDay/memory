@@ -32,13 +32,16 @@ export const Button = ({children, onClick, variant, styles, fullWidth = false, t
     padding: size === 'lg' ? '1rem' : '1rem 1.5rem',
     borderRadius: '35px',
     fontWeight: 'bold',
-    fontSize: size === 'lg' ? '2rem' : '1.25rem',
+    fontSize: size === 'lg' ? '1.125rem' : '1rem',
     minWidth: '8rem',
     width: fullWidth ? '100%' : 'auto',
     border: 'none',
     ':hover': {
       backgroundColor: 'var(--hover-color)',
       color: '#fcfcfc',
+    },
+    '@media (min-width: 768px)': {
+      fontSize: size === 'lg' ? '2rem' : '1.25rem',
     }
   }, colors, styles);
 
