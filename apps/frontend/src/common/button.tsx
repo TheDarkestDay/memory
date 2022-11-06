@@ -29,11 +29,10 @@ export const Button = ({children, onClick, variant, styles, fullWidth = false, t
   const rootCss = css({
     backgroundColor: 'var(--bg-color)',
     color: 'var(--text-color)',
-    padding: size === 'lg' ? '1rem' : '1rem 1.5rem',
+    padding: size === 'lg' ? '1rem' : '0.625rem 1.125rem',
     borderRadius: '35px',
     fontWeight: 'bold',
     fontSize: size === 'lg' ? '1.125rem' : '1rem',
-    minWidth: '8rem',
     width: fullWidth ? '100%' : 'auto',
     border: 'none',
     ':hover': {
@@ -41,7 +40,9 @@ export const Button = ({children, onClick, variant, styles, fullWidth = false, t
       color: '#fcfcfc',
     },
     '@media (min-width: 768px)': {
+      minWidth: '8rem',
       fontSize: size === 'lg' ? '2rem' : '1.25rem',
+      padding: size === 'lg' ? '1rem' : '1rem 1.5rem',
     }
   }, colors, styles);
 

@@ -19,17 +19,18 @@ const styles = {
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    flexGrow: '1',
-    padding: '1.5rem 1rem',
+    width: '4rem',
     backgroundColor: '#dfe7ec',
+    padding: '0.625rem 0.875rem',
     '--name-color': '#7191a5',
     '--score-color': '#304859',
     '@media (min-width: 768px)': {
+      padding: '1.5rem 1rem',
+      width: '10.25rem',
       alignItems: 'flex-start'
     },
     '@media (min-width: 1024px)': {
-      flexGrow: '0',
-      minWidth: '15rem',
+      width: '15rem',
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
@@ -75,19 +76,23 @@ export const PlayersList = ({ activePlayerName, scores = {} }: Props) => {
   });
 
   return (
-    <FlexRow component="ul" styles={styles.root} gap="1.75rem">
+    <FlexRow component="ul" styles={styles.root} gap="1.75rem" alignItems="stretch">
       {players.map((player) => {
+        const { name, isRobot, shortName } = player;
+
         const playerStyles = css(
           styles.player,
-          player.name === activePlayerName && styles.activePlayer
+          name === activePlayerName && styles.activePlayer
         );
+
+        const shouldShowRobotIcon = isRobot && !isSmallScreen;
 
         return (
           <li
             key={player.id}
             css={playerStyles}
           >
-            <span css={styles.name}>{isSmallScreen ? player.shortName : player.name}</span>
+            <span css={styles.name}>{isSmallScreen ? shortName : name} {shouldShowRobotIcon && '🤖'}</span>
             <span css={styles.score}>{scores[player.name] ?? 0}</span>
           </li>
         );

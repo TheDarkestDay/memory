@@ -41,6 +41,7 @@ export type Player = {
   id: string;
   name: string;
   shortName: string;
+  isRobot: boolean;
 };
 
 export type Game = GameFormValues & {

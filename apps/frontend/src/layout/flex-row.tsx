@@ -6,15 +6,16 @@ type Props = {
   component?: React.ElementType;
   styles?: SerializedStyles;
   justifyContent?: CSSProperties['justifyContent'];
+  alignItems?: CSSProperties['alignItems'];
   gap?: string;
 };
 
-export const FlexRow = ({children, gap, styles, justifyContent = 'flex-start', component = 'div'}: Props) => {
+export const FlexRow = ({children, gap, styles, justifyContent = 'flex-start', alignItems = 'center', component = 'div'}: Props) => {
   const rootCss = css({
     display: 'flex',
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent,
+    alignItems,
     gap,
   }, styles);
 

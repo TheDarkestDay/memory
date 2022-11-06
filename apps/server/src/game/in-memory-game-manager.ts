@@ -43,20 +43,20 @@ export class InMemoryGameManager implements GameManager {
     }
 
     const { players, playersCount } = targetGame;
-    const robotPlayers = [];
+    const robotPlayers: Player[] = [];
     if (players.length < playersCount) {
       const robotPlayersCount = playersCount - players.length;
 
       for (let i = 0; i < robotPlayersCount; i++) {
-        const robotPlayerName = generateUniqueName();
-        const [, animal] = robotPlayerName.split(' ');
-        const shortName = `${getAnimalEmoji(animal)}🤖`;
-        const name = `${robotPlayerName} 🤖`;
+        const name = generateUniqueName();
+        const [, animal] = name.split(' ');
+        const shortName = getAnimalEmoji(animal);
         
         robotPlayers.push({
-          id: robotPlayerName,
+          id: name,
           name,
-          shortName 
+          shortName,
+          isRobot: true, 
         });
       }
     }
@@ -125,6 +125,7 @@ export class InMemoryGameManager implements GameManager {
       id: randomBytes(8).toString('hex'),
       name: playerName,
       shortName,
+      isRobot: false,
     };
 
     targetGame.players.push(newPlayer);
