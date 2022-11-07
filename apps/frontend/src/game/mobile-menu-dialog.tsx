@@ -21,7 +21,7 @@ const styles = {
 
 export const MobileMenuDialog = ({onClose, onStartButtonClick, isGameFinished}: Props) => {
     return (
-        <Dialog styles={styles.root}>
+        <Dialog styles={styles.root} onClose={onClose}>
             <Button onClick={onStartButtonClick} variant="primary">
                 {isGameFinished ? 'Restart' : 'Start'}
             </Button>

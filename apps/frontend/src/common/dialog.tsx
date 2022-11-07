@@ -1,7 +1,8 @@
 import { css, SerializedStyles } from '@emotion/react';
 
 type Props = {
-  children: React.ReactNode,
+  children: React.ReactNode;
+  onClose?: () => void;
   styles?: SerializedStyles;
 };
 
@@ -24,11 +25,11 @@ const styles = {
   }),
 };
 
-export const Dialog = ({children, styles: externalStyles}: Props) => {
+export const Dialog = ({children, styles: externalStyles, onClose}: Props) => {
   const dialogStyles = css(styles.dialog, externalStyles);
 
   return (
-    <div css={styles.backdrop}>
+    <div css={styles.backdrop} onClick={onClose}>
       <dialog css={dialogStyles} open>
         {children}
       </dialog>

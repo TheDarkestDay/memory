@@ -16,10 +16,39 @@ const styles = {
     fontSize: '1rem',
     borderRadius: '100%',
     border: 'none',
-    backgroundColor: '#bcced9',
+    perspective: '500px',
     '@media (min-width: 768px)': {
       fontSize: '2.75rem',
     }
+  }),
+  flippable: css({
+    width: '100%',
+    height: '100%',
+    transition: 'transform .5s',
+    transformStyle: 'preserve-3d',
+  }),
+  front: css({
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    borderRadius: '100%',
+    backgroundColor: '#304859',
+    ':hover': {
+      backgroundColor: '#6395b8',
+    },
+    backfaceVisibility: 'hidden',
+  }),
+  back: css({
+    position: 'absolute',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    height: '100%',
+    borderRadius: '100%',
+    backgroundColor: '#fda214',
+    backfaceVisibility: 'hidden',
+    transform: 'rotateY(180deg)',
   })
 };
 
@@ -36,22 +65,23 @@ export const GameCell = ({row, col, content, isRevealed}: Props) => {
     revealCell.mutateAsync({gameId, row, col, playerName});
   }
 
-  const rootStyles = css(
-    styles.root,
-    content === '❓' && {
-      backgroundColor: '#304859',
-      ':hover': {
-        backgroundColor: '#6395b8',
-      }
-    },
-    isRevealed && {
-      backgroundColor: '#fda214',
+  const shouldFlipCellOver = isRevealed || (content !== '❓');
+
+  const flippableStyles = css(
+    styles.flippable,
+    shouldFlipCellOver && {
+      transform: 'rotateY(180deg)'
     }
   );
 
   return (
-    <button css={rootStyles} onClick={handleCellButtonClick}>
-      {content === '❓' ? '' : content}
+    <button css={styles.root} onClick={handleCellButtonClick}>
+      <div css={flippableStyles}>
+        <div css={styles.front}></div>
+        <div css={styles.back}>
+          {content !== '❓' && content}
+        </div>
+      </div>
     </button>
   );
 };
