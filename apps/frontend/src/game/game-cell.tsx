@@ -17,6 +17,7 @@ const styles = {
     borderRadius: '100%',
     border: 'none',
     perspective: '500px',
+    background: 'none',
     '@media (min-width: 768px)': {
       fontSize: '2.75rem',
     }
