@@ -20,29 +20,43 @@ const playersScore = {
 
 const styles = {
   dialog: css({
-    minWidth: '40rem'
+    width: 'calc(100% - 3rem)',
+    padding: '1.5rem',
+    '@media (min-width: 768px)': {
+      width: '40rem',
+      padding: '3.5rem',
+    }
   }),
   title: css({
     textAlign: 'center',
-    fontSize: '48px',
+    fontSize: '1.5rem',
     marginBottom: '1rem',
     marginTop: '0',
+    '@media (min-width: 768px)': {
+      fontSize: '3rem'
+    }
   }),
   subtitle: css({
     marginBottom: '2.5rem',
     textAlign: 'center',
-    fontSize: '18px',
-    color: '#7191a5'
+    fontSize: '0.937rem',
+    color: '#7191a5',
+    '@media (min-width: 768px)': {
+      fontSize: '1.125rem'
+    }
   }),
   scoreboard: css({
     marginBlockStart: 0,
     marginBlockEnd: 0,
     paddingInlineStart: 0,
-    paddingBottom: '3rem',
+    marginBottom: '1.5rem',
     display: 'flex',
     flexDirection: 'column',
     gap: '1rem',
     listStyle: 'none',
+    '@media (min-width: 768px)': {
+      marginBottom: '3rem'
+    }
   }),
   playerScore: css(playersScore),
   winnersPlayerScore: css({
@@ -52,12 +66,25 @@ const styles = {
     '--score-color': '#fcfcfc',
   }),
   playerName: css({
-    fontSize: '1.25rem',
+    fontSize: '0.8125rem',
     color: 'var(--name-color)',
+    '@media (min-width: 768px)': {
+      fontSize: '1.25rem'
+    }
   }),
   scoreCount: css({
-    fontSize: '2rem',
+    fontSize: '1.25rem',
     color: 'var(--score-color)',
+    '@media (min-width: 768px)': {
+      fontSize: '2rem',
+    }
+  }),
+  actions: css({
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    '@media (min-width: 768px)': {
+      flexDirection: 'row',
+    }
   })
 };
 
@@ -87,7 +114,7 @@ export const GameResultsDialog = ({ scores, onRestart }: Props) => {
         }
       </ul>
 
-      <FlexRow gap="1rem">
+      <FlexRow styles={styles.actions} gap="1rem">
         <FlexItem>
           <Button onClick={onRestart} fullWidth variant="primary">Restart</Button>
         </FlexItem>
