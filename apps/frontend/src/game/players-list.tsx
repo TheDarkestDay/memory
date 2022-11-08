@@ -15,6 +15,7 @@ const styles = {
     listStyleType: 'none',
   }),
   player: css({
+    position: 'relative',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -40,6 +41,17 @@ const styles = {
     backgroundColor: '#fda214',
     '--name-color': '#fcfcfc',
     '--score-color': '#fcfcfc',
+    ':before': {
+      content: `''`,
+      position: 'absolute',
+      width: '1.5rem',
+      height: '1.5rem',
+      backgroundColor: '#fda214',
+      transform: 'translate(-50%, -50%) rotate(45deg)',
+      transformOrigin: 'center center',
+      left: '50%',
+      top: '0',
+    }
   }),
   name: css({
     color: 'var(--name-color)',
