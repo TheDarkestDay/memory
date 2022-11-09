@@ -1,9 +1,10 @@
 import { css } from '@emotion/react';
 import { GameUiState } from '@memory/shared';
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 import { Button } from '../common/button';
+import { IconButton } from '../common/icon-button';
 import { FlexRow } from '../layout';
 import { trpc } from '../trpc';
 import { GameField } from './game-field';
@@ -57,6 +58,22 @@ const styles = {
     '@media (min-width: 768px)': {
       display: 'none'
     }
+  }),
+  instruction: css({
+    width: '100%',
+    fontSize: '1.5rem',
+    textAlign: 'center',
+    '@media (min-width: 768px)': {
+      width: '40rem',
+      marginLeft: 'auto',
+      marginRight: 'auto'
+    }
+  }),
+  gameLink: css({
+    wordBreak: 'break-word',
+    backgroundColor: '#dfe7ec',
+    borderRadius: '4px',
+    padding: '0.5rem'
   })
 };
 
@@ -105,9 +122,19 @@ export const GamePage = () => {
     setIsMenuDialogOpen(false);
   };
 
+  const handleCopyGameUrlButtonClick = async () => {
+    try {
+      await navigator.clipboard.writeText(gameUrl);
+    } catch (error) {
+      console.error('Failed to write game URL to clipboard due to: ', error);
+    }
+  };
+
   const startGameButtonLabel = isGameFinished 
     ? 'Restart game' 
     : 'Start game';
+
+  const gameUrl = `https://${process.env.NX_FRONTEND_DOMAIN}/game/${gameId}`;
 
   return (
     <main css={styles.main}>
@@ -130,6 +157,21 @@ export const GamePage = () => {
           Menu
         </Button>
       </FlexRow>
+
+      {
+        gameState == null &&
+          <section css={styles.instruction}>
+            <p>
+              Invite friends by sending them this link:
+            </p>
+            <FlexRow styles={styles.gameLink}>
+              {gameUrl}
+
+              <IconButton icon='copy' onClick={handleCopyGameUrlButtonClick} />
+            </FlexRow>
+            <p>or press "Start game" right away to play against AI.</p>
+          </section>
+      }
 
       <section css={styles.fieldSection}>
         {gameState && <GameField state={gameState} />}

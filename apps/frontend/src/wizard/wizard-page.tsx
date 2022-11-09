@@ -46,7 +46,7 @@ const styles = {
   }),
   fieldSetTitle: css({
     color: '#7191a5',
-    fontSize: '15px',
+    fontSize: '0.9375rem',
     fontWeight: 'bold',
     marginBottom: '0.75rem',
     '@media (min-width: 768px)': {
