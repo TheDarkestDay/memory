@@ -14,10 +14,12 @@ type Props = {
 const styles = {
   root: css({
     fontSize: '1rem',
+    fontWeight: 'bold',
     borderRadius: '100%',
     border: 'none',
     perspective: '500px',
     background: 'none',
+    color: '#fcfcfc',
     '@media (min-width: 768px)': {
       fontSize: '2.75rem',
     }
@@ -47,7 +49,6 @@ const styles = {
     width: '100%',
     height: '100%',
     borderRadius: '100%',
-    backgroundColor: '#fda214',
     backfaceVisibility: 'hidden',
     transform: 'rotateY(180deg)',
   })
@@ -75,11 +76,18 @@ export const GameCell = ({row, col, content, isRevealed}: Props) => {
     }
   );
 
+  const backStyles = css(
+    styles.back,
+    {
+      backgroundColor: isRevealed ? '#fda214' : '#bcced9'
+    }
+  );
+
   return (
     <button css={styles.root} onClick={handleCellButtonClick}>
       <div css={flippableStyles}>
         <div css={styles.front}></div>
-        <div css={styles.back}>
+        <div css={backStyles}>
           {content !== '❓' && content}
         </div>
       </div>
