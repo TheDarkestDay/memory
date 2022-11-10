@@ -1,4 +1,5 @@
 import { resolve } from 'path';
+import { IncomingMessage } from 'http';
 import { readFileSync } from 'fs';
 import ws from '@fastify/websocket';
 import fastify from 'fastify';
@@ -7,6 +8,7 @@ import cookie from '@fastify/cookie';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import { createRouterWithContext } from '@memory/shared';
 
+import './declarations';
 import { Context, createContext } from './context';
 import { inMemoryGameManager } from './game/in-memory-game-manager';
 
@@ -35,7 +37,21 @@ server.register(cookie);
 
 const appRouter = createRouterWithContext<Context>(inMemoryGameManager);
 
-server.register(ws);
+server.register(ws, {
+  options: {
+    verifyClient: ({req}: {req: IncomingMessage}, next) => {
+      const rawCookie = req.headers.cookie;
+
+      if (rawCookie == null) {
+        return next(false);
+      }
+
+      req.cookies = server.parseCookie(rawCookie);
+
+      next(true);
+    }
+  }
+});
 
 server.register(fastifyTRPCPlugin, {
   useWSS: true,

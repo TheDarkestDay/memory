@@ -40,7 +40,16 @@ export const createRouterWithContext = <TContext extends WebServerContext>(gameM
         const { gameId } = input;
 
         const { playerId } = ctx;
-        console.log(`Player joined with cookie: ${playerId}`);
+
+        if (playerId == null) {
+          throw new Error('Failed to subscribe to game state change: player id is not set');
+        }
+
+        const player = await gameManager.getPlayerById(gameId, playerId);
+
+        if (player == null) {
+          throw new Error('Failed to subscribe to game state change: player is not found');
+        }
         
         return new Subscription<GameUiState | null>((emit) => {
           const handleGameStateChange = (data: GameData) => {
@@ -59,6 +68,8 @@ export const createRouterWithContext = <TContext extends WebServerContext>(gameM
 
           return () => {
             gameManager.off(gameId, 'gameStateChange', handleGameStateChange);
+
+            gameManager.removePlayer(gameId, player.name);
           };
         });
       }
