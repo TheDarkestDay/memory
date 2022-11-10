@@ -36,8 +36,11 @@ export const createRouterWithContext = <TContext extends WebServerContext>(gameM
       input: zod.object({
         gameId: zod.string(),
       }),
-      async resolve({input}) {
+      async resolve({input, ctx}) {
         const { gameId } = input;
+
+        const { playerId } = ctx;
+        console.log(`Player joined with cookie: ${playerId}`);
         
         return new Subscription<GameUiState | null>((emit) => {
           const handleGameStateChange = (data: GameData) => {

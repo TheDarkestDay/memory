@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { GameFormValues } from '@memory/shared';
 
 import { GamePage } from '../game/game-page';
-import { trpc, trpcClient } from '../trpc';
+import { trpc, trpcPublicClient } from '../trpc';
 import { WizardPage } from '../wizard/wizard-page';
 
 const router = createBrowserRouter([
@@ -18,7 +18,7 @@ const router = createBrowserRouter([
         theme: formData.get('theme') as GameFormValues['theme'],
       };
 
-      const gameId = await trpcClient.mutation('createGame', payload);
+      const gameId = await trpcPublicClient.mutation('createGame', payload);
 
       return redirect(`/game/${gameId}`);
     } 
@@ -31,7 +31,7 @@ const router = createBrowserRouter([
         throw new Error('Failed to proceed to /game/:gameId path - gameId is missing');
       }
 
-      const player = await trpcClient.mutation('joinGame', { gameId });
+      const player = await trpcPublicClient.mutation('joinGame', { gameId });
 
       return json(
         player,
@@ -48,7 +48,7 @@ const queryClient = new QueryClient();
 
 export const App = () => {
   return (
-    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+    <trpc.Provider client={trpcPublicClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
       </QueryClientProvider>

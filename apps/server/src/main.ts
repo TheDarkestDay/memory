@@ -2,7 +2,6 @@ import { resolve } from 'path';
 import { readFileSync } from 'fs';
 import ws from '@fastify/websocket';
 import fastify from 'fastify';
-import cors from '@fastify/cors';
 import staticFiles from '@fastify/static';
 import cookie from '@fastify/cookie';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
@@ -49,11 +48,7 @@ server.setErrorHandler((error) => {
 });
 
 (async () => {
-  if (process.env.NODE_ENV === 'development') {
-    await server.register(cors, {
-      origin: `https://${process.env.NX_FRONTEND_DOMAIN}`,
-    });
-  } else {
+  if (process.env.NODE_ENV === 'production') {
     await server.register(staticFiles, {
       root: resolve('./dist/apps/frontend'),
       wildcard: false,
