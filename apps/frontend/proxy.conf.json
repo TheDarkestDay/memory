@@ -1,6 +1,6 @@
 {
   "/trpc": {
-    "target": "https://localhost:3001",
+    "target": "https://local-server.thedarkestday-memory.com:3001",
     "secure": false,
     "ws": true
   }
