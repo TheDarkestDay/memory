@@ -39,7 +39,7 @@ export class InMemoryGameManager implements GameManager {
     }
 
     if (targetGame.service !== null) {
-      throw new Error(`Failed to start game with id ${gameId} because it has already been started`);
+      return;
     }
 
     const { players, playersCount } = targetGame;
@@ -86,6 +86,22 @@ export class InMemoryGameManager implements GameManager {
 
     targetGame.service = service;
     targetGame.robots = robots;
+  }
+
+  getGameConfig(gameId: string): GameFormValues {
+    const targetGame = this.games.find((game) => game.id === gameId);
+
+    if (targetGame == null) {
+      throw new Error(`Failed to start game with id ${gameId} because it does not exist`);
+    }
+
+    const { playersCount, theme, fieldSize } = targetGame;
+
+    return {
+      playersCount,
+      theme,
+      fieldSize
+    };
   }
 
   restartGame(gameId: string): void {

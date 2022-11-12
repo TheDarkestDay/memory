@@ -31,10 +31,10 @@ const router = createBrowserRouter([
         throw new Error('Failed to proceed to /game/:gameId path - gameId is missing');
       }
 
-      const player = await trpcPublicClient.mutation('joinGame', { gameId });
+      const game = await trpcPublicClient.mutation('joinGame', { gameId });
 
       return json(
-        player,
+        game,
         {
           status: 200
         }

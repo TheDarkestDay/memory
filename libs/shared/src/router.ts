@@ -7,6 +7,18 @@ import { GameManager, Player } from './game-manager';
 import { WebServerContext } from './web-server-context';
 
 export const createRouterWithContext = <TContext extends WebServerContext>(gameManager: GameManager) => {
+  const getOrCreatePlayer = (playerId: string, gameId: string, ctx: TContext) => {
+    if (playerId == null || !gameManager.isPlayerJoinedGame(gameId, playerId)) {
+      const newPlayer = gameManager.addPlayer(gameId);
+
+      ctx.setCookie('playerId', newPlayer.id);
+
+      return newPlayer;
+    }
+
+    return gameManager.getPlayerById(gameId, playerId);
+  }
+
   return router<TContext>()
     .subscription('joinedPlayersChange', {
       input: zod.object({
@@ -82,15 +94,17 @@ export const createRouterWithContext = <TContext extends WebServerContext>(gameM
         const { gameId } = input;
         const { playerId } = ctx;
 
-        if (playerId == null || !gameManager.isPlayerJoinedGame(gameId, playerId)) {
-          const newPlayer = gameManager.addPlayer(gameId);
-
-          ctx.setCookie('playerId', newPlayer.id);
-
-          return newPlayer;
+        if (playerId == null) {
+          throw new Error(`Faled to join game with id ${gameId}: playerId is not provided`);
         }
 
-        return gameManager.getPlayerById(gameId, playerId);
+        const player = await getOrCreatePlayer(playerId, gameId, ctx);
+        const gameConfig = gameManager.getGameConfig(gameId);
+
+        return {
+          ...gameConfig,
+          player,
+        };
       }
     })
     .mutation('createGame', {

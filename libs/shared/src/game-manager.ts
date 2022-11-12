@@ -30,6 +30,7 @@ export interface GameManager {
   removePlayer(gameId: string, playerName: string): void;
   getPlayersList(gameId: string): Player[];
   getGameData(gameId: string): GameData;
+  getGameConfig(gameId: string): GameFormValues;
   isGameStarted(gameId: string): boolean;
   isPlayerJoinedGame(gameId: string, playerId: string): boolean;
   revealCell(gameId: string, row: number, col: number, playerName: string): void;
@@ -49,4 +50,8 @@ export type Game = GameFormValues & {
   service: GameService;
   players: Player[];
   robots: RobotPlayer[];
+};
+
+export type GameInfoForPlayer = GameFormValues & {
+  player: Player
 };
