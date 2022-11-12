@@ -6,6 +6,9 @@ import { FlexRow } from '../layout';
 
 import { trpc } from '../trpc';
 import { useMediaQuery } from '../common/use-media-query';
+import { BannerValue } from '../common/banner-value';
+import { Banner } from '../common/banner';
+import { BannerTitle } from '../common/banner-title';
 
 const styles = {
   root: css({
@@ -13,61 +16,7 @@ const styles = {
     marginBlockEnd: 0,
     paddingInlineStart: 0,
     listStyleType: 'none',
-  }),
-  player: css({
-    position: 'relative',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '4rem',
-    backgroundColor: '#dfe7ec',
-    padding: '0.625rem 0.875rem',
-    '--name-color': '#7191a5',
-    '--score-color': '#304859',
-    '@media (min-width: 768px)': {
-      padding: '1.5rem 1rem',
-      width: '10.25rem',
-      alignItems: 'flex-start'
-    },
-    '@media (min-width: 1024px)': {
-      width: '15rem',
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    }
-  }),
-  activePlayer: css({
-    backgroundColor: '#fda214',
-    '--name-color': '#fcfcfc',
-    '--score-color': '#fcfcfc',
-    ':before': {
-      content: `''`,
-      position: 'absolute',
-      width: '1.5rem',
-      height: '1.5rem',
-      backgroundColor: '#fda214',
-      transform: 'translate(-50%, -50%) rotate(45deg)',
-      transformOrigin: 'center center',
-      left: '50%',
-      top: '0',
-    }
-  }),
-  name: css({
-    color: 'var(--name-color)',
-    fontSize: '0.9375rem',
-    fontWeight: 'bold',
-    '@media (min-width: 1024px)': {
-      fontSize: '1.25rem'
-    }
-  }),
-  score: css({
-    color: 'var(--score-color)',
-    fontSize: '1.5rem',
-    '@media (min-width: 1024px)': {
-      fontSize: '2rem'
-    },
-  }),
+  })
 };
 
 type Props = {
@@ -92,21 +41,20 @@ export const PlayersList = ({ activePlayerName, scores = {} }: Props) => {
       {players.map((player) => {
         const { name, isRobot, shortName } = player;
 
-        const playerStyles = css(
-          styles.player,
-          name === activePlayerName && styles.activePlayer
-        );
+        const isActivePlayer = name === activePlayerName;
+        const playerBannerColor = isActivePlayer ? 'accent' : 'primary';
 
         const shouldShowRobotIcon = isRobot && !isSmallScreen;
 
         return (
-          <li
+          <Banner
             key={player.id}
-            css={playerStyles}
+            color={playerBannerColor}
+            showArrow={isActivePlayer}
           >
-            <span css={styles.name}>{isSmallScreen ? shortName : name} {shouldShowRobotIcon && '🤖'}</span>
-            <span css={styles.score}>{scores[player.name] ?? 0}</span>
-          </li>
+            <BannerTitle>{isSmallScreen ? shortName : name} {shouldShowRobotIcon && '🤖'}</BannerTitle>
+            <BannerValue>{scores[player.name] ?? 0}</BannerValue>
+          </Banner>
         );
       })}
     </FlexRow>
