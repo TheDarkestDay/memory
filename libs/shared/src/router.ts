@@ -7,7 +7,7 @@ import { GameManager, Player } from './game-manager';
 import { WebServerContext } from './web-server-context';
 
 export const createRouterWithContext = <TContext extends WebServerContext>(gameManager: GameManager) => {
-  const getOrCreatePlayer = (playerId: string, gameId: string, ctx: TContext) => {
+  const getOrCreatePlayer = (playerId: string | undefined, gameId: string, ctx: TContext) => {
     if (playerId == null || !gameManager.isPlayerJoinedGame(gameId, playerId)) {
       const newPlayer = gameManager.addPlayer(gameId);
 
@@ -93,10 +93,6 @@ export const createRouterWithContext = <TContext extends WebServerContext>(gameM
       async resolve({input, ctx}) {
         const { gameId } = input;
         const { playerId } = ctx;
-
-        if (playerId == null) {
-          throw new Error(`Faled to join game with id ${gameId}: playerId is not provided`);
-        }
 
         const player = await getOrCreatePlayer(playerId, gameId, ctx);
         const gameConfig = gameManager.getGameConfig(gameId);
