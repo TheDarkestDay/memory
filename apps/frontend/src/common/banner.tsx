@@ -1,9 +1,12 @@
 import { css, jsx } from '@emotion/react';
 
+type BannerColor = 'primary' | 'accent' | 'dark';
+
 type Props = {
-    color?: 'primary' | 'accent'
+    color?: BannerColor;
     component?: React.ElementType;
     showArrow?: boolean;
+    fullWidth?: boolean;
     children: React.ReactNode;
 };
 
@@ -15,10 +18,8 @@ const styles = {
         justifyContent: 'center',
         alignItems: 'center',
         width: '4rem',
-        backgroundColor: '#dfe7ec',
         padding: '0.625rem 0.875rem',
-        '--name-color': '#7191a5',
-        '--score-color': '#304859',
+        borderRadius: '5px',
         '@media (min-width: 768px)': {
             padding: '1.5rem 1rem',
             width: '10.25rem',
@@ -33,14 +34,41 @@ const styles = {
     })
 };
 
-export const Banner = ({ component = 'div', color = 'primary', children, showArrow = false }: Props) => {
+const getBannerColorStyles = (color: BannerColor) => {
+    switch (color) {
+        case 'primary':
+            return {
+                backgroundColor: '#dfe7ec',
+                '--name-color': '#7191a5',
+                '--score-color': '#304859',
+            };
+        case 'accent':
+            return {
+                backgroundColor: '#fda214',
+                '--name-color': '#fcfcfc',
+                '--score-color': '#fcfcfc',
+            }
+        case 'dark':
+            return {
+                backgroundColor: '#152938',
+                '--name-color': '#fcfcfc',
+                '--score-color': '#fcfcfc',
+            }
+    }
+};
+
+export const Banner = ({ component = 'div', color = 'primary', children, showArrow = false, fullWidth = false }: Props) => {
     const rootStyles = css(
         styles.root,
-        color === 'accent' && {
-            backgroundColor: '#fda214',
-            '--name-color': '#fcfcfc',
-            '--score-color': '#fcfcfc',
+        fullWidth && {
+            '@media (min-width: 320px)': {
+                width: '100%',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+            },
         },
+        getBannerColorStyles(color),
         showArrow && {
             ':before': {
                 content: `''`,

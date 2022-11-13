@@ -7,10 +7,11 @@ export type GameUiState = {
   currentPlayer: string;
   scores: Record<string, number>;
   players: string[];
+  movesCount: number;
 };
 
 export const getGameUiStateFromGameData = (context: GameData): GameUiState => {
-  const { field, phase, revealedCells, capturedCells, currentPlayer, scores, players } = context;
+  const { field, phase, revealedCells, capturedCells, currentPlayer, scores, players, movesCount } = context;
 
   const fieldToRender = [];
 
@@ -32,6 +33,7 @@ export const getGameUiStateFromGameData = (context: GameData): GameUiState => {
     cellsRevealedThisTurn: revealedCells,
     currentPlayer,
     scores,
-    players
+    players,
+    movesCount
   }
 };

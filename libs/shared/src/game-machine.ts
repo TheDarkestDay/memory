@@ -12,6 +12,7 @@ export type GameContext = GameStateConfig & {
   currentPlayer: string;
   revealedCells: [number, number][];
   capturedCells: [number, number][];
+  movesCount: number;
 };
 
 export type GameData = {
@@ -33,10 +34,12 @@ type GameMachineOptions = {
 };
 
 const REVEAL_CELL_ACTION = assign<GameContext>((context, event) => {
+  const { movesCount } = context;
   const { row, col } = event as unknown as RevealNextCellEvent;
 
   return {
     ...context,
+    movesCount: movesCount + 1,
     revealedCells: [...context.revealedCells, [row, col]],
   };
 });
@@ -63,6 +66,7 @@ export const createGameMachine = ({field, players}: GameStateConfig, { checkScor
       scores,
       revealedCells: [],
       capturedCells: [],
+      movesCount: 0,
     },
     states: {
       noCellsRevealed: {

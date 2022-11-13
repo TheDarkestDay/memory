@@ -4,7 +4,7 @@ import { GameUiState } from "@memory/shared";
 import { IconButton } from '../common/icon-button';
 import { FlexRow } from '../layout';
 import { GameField } from './game-field';
-import { GameResultsDialog } from './game-results-dialog';
+import { MultiplayerGameResultsDialog } from './multiplayer-game-results-dialog';
 import { PlayersList } from './players-list';
 
 type Props = {
@@ -72,7 +72,7 @@ export const MultiplayerGame = ({ gameState, gameId, onRestart, isGameFinished }
             <PlayersList activePlayerName={gameState?.currentPlayer} scores={gameState?.scores} />
 
             {
-                isGameFinished && <GameResultsDialog onRestart={onRestart} scores={gameState?.scores ?? { john: 3, robert: 5, alice: 6, kirk: 1 }} />
+                isGameFinished && <MultiplayerGameResultsDialog onRestart={onRestart} scores={gameState?.scores ?? { john: 3, robert: 5, alice: 6, kirk: 1 }} />
             }
         </>
     );

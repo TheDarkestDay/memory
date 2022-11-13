@@ -8,6 +8,7 @@ import { formatTime } from "../common/format-time";
 import { FlexRow } from "../layout";
 
 import { GameField } from "./game-field";
+import { TimeAttackResultsDialog } from "./time-attack-results-dialog";
 import { useTimer } from "./use-timer";
 
 type Props = {
@@ -24,9 +25,17 @@ const styles = {
 };
 
 export const TimeAttack = ({ gameState, onRestart, onReady }: Props) => {
+    const movesCount = gameState?.movesCount ?? 0;
+
     const isGameInProgress = gameState?.phase !== 'finished';
-    const timePassed = useTimer(isGameInProgress);
-    const formattedTime = formatTime(timePassed);
+    const isGameFinished = gameState?.phase === 'finished';
+    const {elapsedSeconds, reset} = useTimer(isGameInProgress);
+    const formattedTime = formatTime(elapsedSeconds);
+
+    const handleRestartButtonClick = () => {
+        reset();
+        onRestart();
+    };
 
     useEffect(() => {
         onReady();        
@@ -55,10 +64,14 @@ export const TimeAttack = ({ gameState, onRestart, onReady }: Props) => {
                     </BannerTitle>
 
                     <BannerValue>
-                        0
+                        {movesCount}
                     </BannerValue>
                 </Banner>
             </FlexRow>
+
+            {
+                isGameFinished && <TimeAttackResultsDialog movesCount={movesCount} time={elapsedSeconds} onRestart={handleRestartButtonClick} />
+            }
         </>
     );
 };

@@ -1,4 +1,4 @@
-import { GameInfoForPlayer, Player } from '@memory/shared';
+import { GameInfoForPlayer } from '@memory/shared';
 import { useLoaderData, useParams } from 'react-router-dom';
 import { css } from '@emotion/react';
 

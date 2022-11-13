@@ -9,6 +9,10 @@ const timerWorker = new Worker(
 export const useTimer = (enabled: boolean) => {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
+  const reset = () => {
+    setElapsedSeconds(0);
+  };
+
   useEffect(() => {
     if (!enabled) {
       return;
@@ -16,12 +20,12 @@ export const useTimer = (enabled: boolean) => {
 
     timerWorker.postMessage('start');
 
-    timerWorker.onmessage = ({data}) => {
-        setElapsedSeconds(data);
+    timerWorker.onmessage = ({ data }) => {
+      setElapsedSeconds(data);
     };
 
     return () => timerWorker.postMessage('stop');
   }, [enabled, setElapsedSeconds]);
 
-  return elapsedSeconds;
+  return { elapsedSeconds, reset };
 };

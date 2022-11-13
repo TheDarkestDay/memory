@@ -1,4 +1,7 @@
 import { css } from '@emotion/react';
+import { Banner } from '../common/banner';
+import { BannerTitle } from '../common/banner-title';
+import { BannerValue } from '../common/banner-value';
 
 import { Button } from '../common/button';
 import { Dialog } from '../common/dialog';
@@ -7,15 +10,6 @@ import { FlexItem, FlexRow } from '../layout';
 type Props = {
   scores: Record<string, number>;
   onRestart: () => void;
-};
-
-const playersScore = {
-  '--bg-color': '#dfe7ec',
-  '--name-color': '#7191a5',
-  '--score-color': '#304859',
-  padding: '1rem 2rem',
-  backgroundColor: 'var(--bg-color)',
-  borderRadius: '10px',
 };
 
 const styles = {
@@ -58,27 +52,6 @@ const styles = {
       marginBottom: '3rem'
     }
   }),
-  playerScore: css(playersScore),
-  winnersPlayerScore: css({
-    ...playersScore,
-    '--bg-color': '#152938',
-    '--name-color': '#fcfcfc',
-    '--score-color': '#fcfcfc',
-  }),
-  playerName: css({
-    fontSize: '0.8125rem',
-    color: 'var(--name-color)',
-    '@media (min-width: 768px)': {
-      fontSize: '1.25rem'
-    }
-  }),
-  scoreCount: css({
-    fontSize: '1.25rem',
-    color: 'var(--score-color)',
-    '@media (min-width: 768px)': {
-      fontSize: '2rem',
-    }
-  }),
   actions: css({
     flexDirection: 'column',
     alignItems: 'stretch',
@@ -88,7 +61,7 @@ const styles = {
   })
 };
 
-export const GameResultsDialog = ({ scores, onRestart }: Props) => {
+export const MultiplayerGameResultsDialog = ({ scores, onRestart }: Props) => {
   const entries = Object.entries(scores);
   const sortedEntries = entries.sort(([, scoreA], [, scoreB]) => scoreB - scoreA);
   const [[winnerName, winnerScore], ...others] = sortedEntries;
@@ -100,26 +73,26 @@ export const GameResultsDialog = ({ scores, onRestart }: Props) => {
       <p css={styles.subtitle}>Game over! Here are the results...</p>
 
       <ul css={styles.scoreboard}>
-        <FlexRow styles={styles.winnersPlayerScore} component="li" justifyContent="space-between">
-          <span css={styles.playerName}>{winnerName}</span>
-          <span css={styles.scoreCount}>{winnerScore} Pairs</span>
-        </FlexRow>
+        <Banner fullWidth color="dark" component="li">
+          <BannerTitle>{winnerName}</BannerTitle>
+          <BannerValue>{winnerScore} Pairs</BannerValue>
+        </Banner>
         {
           others.map(([name, score]) => (
-            <FlexRow key={name} styles={styles.playerScore} component="li" justifyContent="space-between">
-              <span css={styles.playerName}>{name}</span>
-              <span css={styles.scoreCount}>{score} Pairs</span>
-            </FlexRow>
+            <Banner fullWidth key={name} component="li">
+              <BannerTitle>{name}</BannerTitle>
+              <BannerValue>{score} Pairs</BannerValue>
+            </Banner>
           ))
         }
       </ul>
 
       <FlexRow styles={styles.actions} gap="1rem">
-        <FlexItem>
+        <FlexItem basis='50%'>
           <Button onClick={onRestart} fullWidth variant="primary">Restart</Button>
         </FlexItem>
 
-        <FlexItem>
+        <FlexItem basis='50%'>
           <Button to="/" fullWidth variant="secondary">Setup New Game</Button>
         </FlexItem>
       </FlexRow>
