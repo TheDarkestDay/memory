@@ -67,7 +67,7 @@ export const MultiplayerGameResultsDialog = ({ scores, onRestart }: Props) => {
   const [[winnerName, winnerScore], ...others] = sortedEntries;
 
   return (
-    <Dialog styles={styles.dialog}>
+    <Dialog styles={styles.dialog} ariaLabel="End of the game">
       <h2 css={styles.title}>{winnerName} wins!</h2>
 
       <p css={styles.subtitle}>Game over! Here are the results...</p>

@@ -59,7 +59,7 @@ export const MultiplayerGame = ({ gameState, gameId, onRestart, isGameFinished }
                     <FlexRow styles={styles.gameLink}>
                         {gameUrl}
 
-                        <IconButton icon='copy' onClick={handleCopyGameUrlButtonClick} />
+                        <IconButton ariaLabel='Copy link' icon='copy' onClick={handleCopyGameUrlButtonClick} />
                     </FlexRow>
                     <p>or press "Start game" right away to play against AI.</p>
                 </section>

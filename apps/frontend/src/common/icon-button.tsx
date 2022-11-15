@@ -6,6 +6,7 @@ type Props = {
     icon: 'copy';
     onClick?: () => void;
     styles?: SerializedStyles;
+    ariaLabel?: string;
 };
 
 const styles = {
@@ -27,9 +28,9 @@ const getIconComponent = (icon: Props['icon']) => {
     }
 }
 
-export const IconButton = ({icon, onClick}: Props) => {
+export const IconButton = ({icon, onClick, ariaLabel}: Props) => {
     return (
-        <button css={styles.root} onClick={onClick}>
+        <button css={styles.root} onClick={onClick} aria-label={ariaLabel}>
             <Icon size="2rem">
                 {getIconComponent(icon)}
             </Icon>
