@@ -12,11 +12,13 @@ import './declarations';
 import { Context, createContext } from './context';
 import { inMemoryGameManager } from './game/in-memory-game-manager';
 
-const PORT = Number(process.env.NX_SERVER_PORT) || 3001;
+const isProduction = process.env.NODE_ENV === 'production';
+const envSuppliedPort = isProduction ? process['en' + 'v']['PORT'] : process.env.NX_SERVER_PORT;
+const port = envSuppliedPort || '3001';
 
 let httpsConfig;
 
-if (process.env.NODE_ENV === 'development') {
+if (!isProduction) {
   httpsConfig = {
     key: readFileSync(
       './apps/server/certs/local-server.thedarkestday-memory.com-key.pem'
@@ -64,7 +66,7 @@ server.setErrorHandler((error) => {
 });
 
 (async () => {
-  if (process.env.NODE_ENV === 'production') {
+  if (isProduction) {
     await server.register(staticFiles, {
       root: resolve('./dist/apps/frontend'),
       wildcard: false,
@@ -76,8 +78,8 @@ server.setErrorHandler((error) => {
   }
 
   try {
-    await server.listen({ port: PORT, host: '0.0.0.0' });
-    console.log(`Server listening on port ${PORT}`);
+    await server.listen({ port: Number(port), host: '0.0.0.0' });
+    console.log(`Server listening on port ${port}`);
   } catch (err) {
     server.log.error(err);
     process.exit(1);

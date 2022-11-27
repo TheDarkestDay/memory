@@ -6,8 +6,8 @@
     "start": "node ./dist/apps/server/main.js",
     "dev": "nx run-many --target=serve --projects=frontend,server --parallel",
     "build:frontend": "nx build --production",
-    "build:server": "./pre-deploy.sh && nx build --project=server --production",
-    "build": "./pre-deploy.sh && nx run-many --target=build --projects=frontend,server --parallel --production",
+    "build:server": "nx build --project=server --production",
+    "build": "nx run-many --target=build --projects=frontend,server --parallel --production",
     "test": "nx run-many --target=test --projects=frontend,server"
   },
   "engines": {
