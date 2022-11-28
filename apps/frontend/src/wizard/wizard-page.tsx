@@ -70,6 +70,18 @@ const styles = {
     '@media (min-width: 768px)': {
       fontSize: '1.625rem'
     }
+  }),
+  twoControlsRow: css({
+    gap: '0.6875rem',
+    '@media (min-width: 768px)': {
+      gap: '1.875rem'
+    }
+  }),
+  fourControlsRow: css({
+    gap: '0.625rem',
+    '@media (min-width: 768px)': {
+      gap: '1.375rem'
+    }
   })
 };
 
@@ -82,7 +94,7 @@ export const WizardPage = () => {
         <fieldset css={styles.fieldSet}>
           <legend css={styles.fieldSetTitle}>Select Theme</legend>
 
-          <FlexRow gap="1.875rem">
+          <FlexRow styles={styles.twoControlsRow}>
             <FlexItem>
               <input
                 defaultChecked
@@ -111,7 +123,7 @@ export const WizardPage = () => {
         <fieldset css={styles.fieldSet}>
           <legend css={styles.fieldSetTitle}>Number of Players</legend>
 
-          <FlexRow gap="1.375rem">
+          <FlexRow styles={styles.fourControlsRow}>
             <FlexItem>
               <input id="players-one" css={visuallyHidden} type="radio" name="playersCount" value="1" />
               <label css={styles.chip} htmlFor="players-one">1</label>
@@ -137,7 +149,7 @@ export const WizardPage = () => {
         <fieldset css={styles.fieldSet}>
           <legend css={styles.fieldSetTitle}>Grid Size</legend>
 
-          <FlexRow gap="1.875rem">
+          <FlexRow styles={styles.twoControlsRow}>
             <FlexItem>
               <input id="size-small" defaultChecked css={visuallyHidden} type="radio" name="fieldSize" value="4" />
               <label css={styles.chip} htmlFor="size-small">4x4</label>

@@ -16,14 +16,14 @@ type Props = {
 
 const styles = {
   root: css({
-    fontSize: '1rem',
+    fontSize: '1.5rem',
     fontWeight: 'bold',
     borderRadius: '100%',
     border: 'none',
     perspective: '500px',
     background: 'none',
     color: '#fcfcfc',
-    '@media (min-width: 768px)': {
+    '@media (min-width: 375px)': {
       fontSize: '2.75rem',
     }
   }),
