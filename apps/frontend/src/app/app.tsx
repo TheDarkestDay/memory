@@ -16,6 +16,7 @@ const router = createBrowserRouter([
         fieldSize: Number(formData.get('fieldSize')),
         playersCount: Number(formData.get('playersCount')),
         theme: formData.get('theme') as GameFormValues['theme'],
+        speed: formData.get('speed') as GameFormValues['speed']
       };
 
       const gameId = await trpcPublicClient.mutation('createGame', payload);

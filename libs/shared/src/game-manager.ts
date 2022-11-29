@@ -3,10 +3,13 @@ import { RobotPlayer } from './robot-player';
 
 export type GameTheme = 'numbers' | 'emojis';
 
+export type GameSpeed = 'normal' | 'relaxing';
+
 export type GameFormValues = {
   fieldSize: number;
   playersCount: number;
   theme: GameTheme;
+  speed: GameSpeed;
 };
 
 export type GameEvent = 'gameStateChange' | 'playersListChange';

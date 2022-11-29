@@ -6,6 +6,7 @@ import { useLoaderData, useParams } from 'react-router-dom';
 import { Button } from '../common/button';
 import { FlexRow } from '../layout';
 import { trpc } from '../trpc';
+import { Announcer } from './announcer';
 import { MobileMenuDialog } from './mobile-menu-dialog';
 import { MultiplayerGame } from './multiplayer-game';
 import { TimeAttack } from './time-attack';
@@ -142,6 +143,8 @@ export const Game = () => {
       {
         isMenuDialogOpen && <MobileMenuDialog isGameFinished={isGameFinished} onStartButtonClick={handleStartButtonClick} onClose={handleMenuClose} />
       }
+
+      <Announcer gameState={gameState} />
     </main>
   );
 };

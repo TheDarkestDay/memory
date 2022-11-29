@@ -5,7 +5,11 @@ import { gameFieldFactory, GameFieldFactory } from './game-field-factory';
 import { InfiniteMemoryRobot } from './infinite-memory-robot';
 import { generateUniqueName, getAnimalEmoji } from './player-names';  
 
-const ROBOT_ACTIONS_DELAY = 1_500;
+const NORMAL_ROBOT_ACTIONS_DELAY = 1_500;
+const RELAXING_ROBOT_ACTIONS_DELAY = 3_000;
+
+const NORMAL_CHECK_SCORE_DELAY = 1_500;
+const RELAXING_CHECK_SCORE_DELAY = 3_000;
 
 export class InMemoryGameManager implements GameManager {
   private games: Game[] = [];
@@ -15,7 +19,7 @@ export class InMemoryGameManager implements GameManager {
   constructor(private gameFieldFactory: GameFieldFactory) {
   }
 
-  async createNewGame({theme, fieldSize, playersCount}: GameFormValues): Promise<Game> {
+  async createNewGame({theme, fieldSize, playersCount, speed}: GameFormValues): Promise<Game> {
     const game: Game = {
       id: randomUUID(),
       service: null,
@@ -23,7 +27,8 @@ export class InMemoryGameManager implements GameManager {
       robots: [],
       theme,
       fieldSize,
-      playersCount
+      playersCount,
+      speed
     };
 
     this.games.push(game);
@@ -69,13 +74,16 @@ export class InMemoryGameManager implements GameManager {
       this.emit(gameId, 'gameStateChange', this.buildGameDataFromState(state));
     });
 
+    const { speed } = targetGame;
+    const robotActionsDelay = speed === 'normal' ? NORMAL_ROBOT_ACTIONS_DELAY : RELAXING_ROBOT_ACTIONS_DELAY;
+
     const robots = robotPlayers.map(({name}) => {
       const robot = new InfiniteMemoryRobot(name, service);
 
       robot.addActionListener((revealCellAction) => {
         setTimeout(() => {
           service.send({type: 'REVEAL_NEXT_CELL', ...revealCellAction});
-        }, ROBOT_ACTIONS_DELAY);
+        }, robotActionsDelay);
       });
       robot.startPlaying();
 
@@ -95,12 +103,13 @@ export class InMemoryGameManager implements GameManager {
       throw new Error(`Failed to start game with id ${gameId} because it does not exist`);
     }
 
-    const { playersCount, theme, fieldSize } = targetGame;
+    const { playersCount, theme, fieldSize, speed } = targetGame;
 
     return {
       playersCount,
       theme,
-      fieldSize
+      fieldSize,
+      speed
     };
   }
 
@@ -295,11 +304,13 @@ export class InMemoryGameManager implements GameManager {
     targetEventListeners.forEach((listener) => listener(payload as any));
   }
 
-  private setUpGameMachine({fieldSize, players, theme}: Game) {
+  private setUpGameMachine({fieldSize, players, theme, speed}: Game) {
+    const checkScoreDelay = speed === 'normal' ? NORMAL_CHECK_SCORE_DELAY : RELAXING_CHECK_SCORE_DELAY;
+
     return createGameMachine({
       players: players.map((player) => player.name),
       field: this.gameFieldFactory.createGameField(fieldSize, theme),
-    });
+    }, { checkScoreDelay });
   }
 };
 

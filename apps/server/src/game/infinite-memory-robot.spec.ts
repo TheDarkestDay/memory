@@ -295,7 +295,7 @@ describe('InfiniteMemoryRobot', () => {
                 'Robo-Joe',
                 'Joe'
             ]
-        });
+        }, { checkScoreDelay: CHECK_SCORE_DELAY });
         const service = interpret(machine);
 
         const roboJoe = new InfiniteMemoryRobot('Robo-Joe', service);

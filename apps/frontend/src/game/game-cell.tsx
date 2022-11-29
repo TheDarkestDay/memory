@@ -128,7 +128,8 @@ export const GameCell = ({row, col, content, isFocused = false, isRevealed, onYN
     }
   );
 
-  const ariaLabel = `Cell at row ${row + 1} and column ${col + 1}`;
+  const cellContentName = content === '❓' ? 'Cell' : content;
+  const ariaLabel = `${cellContentName} at row ${row + 1} and column ${col + 1}`;
 
   return (
     <button ref={buttonRef} css={styles.root} onClick={handleCellButtonClick} aria-label={ariaLabel}>

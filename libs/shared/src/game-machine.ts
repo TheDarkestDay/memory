@@ -44,7 +44,7 @@ const REVEAL_CELL_ACTION = assign<GameContext>((context, event) => {
   };
 });
 
-export const createGameMachine = ({field, players}: GameStateConfig, { checkScoreDelay }: GameMachineOptions = { checkScoreDelay: 1_500 }) => {
+export const createGameMachine = ({field, players}: GameStateConfig, { checkScoreDelay }: GameMachineOptions) => {
   const scores = players.reduce((acc, playerName) => {
     return {
       ...acc,

@@ -44,7 +44,7 @@ const styles = {
       marginBottom: '2rem'
     }
   }),
-  fieldSetTitle: css({
+  label: css({
     color: '#7191a5',
     fontSize: '0.9375rem',
     fontWeight: 'bold',
@@ -82,6 +82,10 @@ const styles = {
     '@media (min-width: 768px)': {
       gap: '1.375rem'
     }
+  }),
+  gameSpeedInput: css({
+    display: 'block',
+    width: '100%',
   })
 };
 
@@ -92,7 +96,7 @@ export const WizardPage = () => {
 
       <Form css={styles.form} method="post">
         <fieldset css={styles.fieldSet}>
-          <legend css={styles.fieldSetTitle}>Select Theme</legend>
+          <legend css={styles.label}>Select Theme</legend>
 
           <FlexRow styles={styles.twoControlsRow}>
             <FlexItem>
@@ -121,7 +125,7 @@ export const WizardPage = () => {
         </fieldset>
 
         <fieldset css={styles.fieldSet}>
-          <legend css={styles.fieldSetTitle}>Number of Players</legend>
+          <legend css={styles.label}>Number of Players</legend>
 
           <FlexRow styles={styles.fourControlsRow}>
             <FlexItem>
@@ -147,7 +151,7 @@ export const WizardPage = () => {
         </fieldset>
 
         <fieldset css={styles.fieldSet}>
-          <legend css={styles.fieldSetTitle}>Grid Size</legend>
+          <legend css={styles.label}>Grid Size</legend>
 
           <FlexRow styles={styles.twoControlsRow}>
             <FlexItem>
@@ -158,6 +162,22 @@ export const WizardPage = () => {
             <FlexItem>
               <input id="size-medium" css={visuallyHidden} type="radio" name="fieldSize" value="6" />
               <label css={styles.chip} htmlFor="size-medium">6x6</label>
+            </FlexItem>
+          </FlexRow>
+        </fieldset>
+
+        <fieldset css={styles.fieldSet}>
+          <legend css={styles.label}>Game Speed</legend>
+
+          <FlexRow styles={styles.twoControlsRow}>
+            <FlexItem>
+              <input id="speed-normal" defaultChecked css={visuallyHidden} type="radio" name="speed" value="normal" />
+              <label css={styles.chip} htmlFor="speed-normal">Normal</label>
+            </FlexItem>
+
+            <FlexItem>
+              <input id="speed-relaxing" css={visuallyHidden} type="radio" name="speed" value="relaxing" />
+              <label css={styles.chip} htmlFor="speed-relaxing">Relaxing</label>
             </FlexItem>
           </FlexRow>
         </fieldset>

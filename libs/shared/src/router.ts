@@ -108,11 +108,12 @@ export const createRouterWithContext = <TContext extends WebServerContext>(gameM
         theme: zod.enum(['numbers', 'emojis']),
         fieldSize: zod.number(),
         playersCount: zod.number(),
+        speed: zod.enum(['normal', 'relaxing'])
       }),
       async resolve({input}) {
-        const { theme, fieldSize, playersCount } = input;
+        const { theme, fieldSize, playersCount, speed } = input;
 
-        const newGame = await gameManager.createNewGame({theme, fieldSize, playersCount});
+        const newGame = await gameManager.createNewGame({theme, fieldSize, playersCount, speed});
 
         return newGame.id;
       }
