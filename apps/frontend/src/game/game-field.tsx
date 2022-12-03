@@ -21,7 +21,7 @@ const styles = {
   })
 };
 
-export const GameField = ({state}: Props) => {
+export const GameField = ({ state }: Props) => {
   const [focusedCell, setFocusedCell] = useState([0, 0]);
   const { field, cellsRevealedThisTurn } = state;
 

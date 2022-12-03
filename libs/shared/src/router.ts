@@ -51,16 +51,12 @@ export const createRouterWithContext = <TContext extends WebServerContext>(gameM
       async resolve({input, ctx}) {
         const { gameId } = input;
 
+        let player: Player | null;
+
         const { playerId } = ctx;
 
-        if (playerId == null) {
-          throw new Error('Failed to subscribe to game state change: player id is not set');
-        }
-
-        const player = await gameManager.getPlayerById(gameId, playerId);
-
-        if (player == null) {
-          throw new Error('Failed to subscribe to game state change: player is not found');
+        if (playerId != null) {
+          player = await gameManager.getPlayerById(gameId, playerId);
         }
         
         return new Subscription<GameUiState | null>((emit) => {
@@ -81,7 +77,9 @@ export const createRouterWithContext = <TContext extends WebServerContext>(gameM
           return () => {
             gameManager.off(gameId, 'gameStateChange', handleGameStateChange);
 
-            gameManager.removePlayer(gameId, player.name);
+            if (player != null) {
+              gameManager.removePlayer(gameId, player.name);
+            }
           };
         });
       }

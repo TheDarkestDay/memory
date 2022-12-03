@@ -19,6 +19,8 @@ const styles = {
     fontSize: '1.5rem',
     fontWeight: 'bold',
     borderRadius: '100%',
+    paddingLeft: '0',
+    paddingRight: '0',
     border: 'none',
     perspective: '500px',
     background: 'none',
