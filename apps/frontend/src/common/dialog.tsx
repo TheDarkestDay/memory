@@ -1,5 +1,5 @@
 import { css, SerializedStyles } from '@emotion/react';
-import { useEffect, useRef, useState } from 'react';
+import { KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { APP_ROOT_ELEMENT_ID, forceLayout } from './dom';
 
@@ -69,9 +69,23 @@ export const Dialog = ({ children, styles: externalStyles, ariaLabel, onClose }:
     }
 
     rootElement.setAttribute('inert', 'true');
+    document.body.style.overflow = 'hidden';
 
-    return () => rootElement.removeAttribute('inert');
-  }, []);
+    const handleKeyDown = (event: Event) => {
+      if ((event as unknown as KeyboardEvent).key === 'Escape' && onClose) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = 'auto';
+      rootElement.removeAttribute('inert');
+
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
 
   return createPortal(
     <div css={styles.backdrop} onClick={onClose}>

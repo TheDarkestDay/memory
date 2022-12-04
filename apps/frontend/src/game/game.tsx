@@ -29,7 +29,7 @@ const styles = {
     }
   }),
   main: css({
-    minHeight: '100%',
+    minHeight: '100vh',
     display: 'flex',
     flexDirection: 'column',
     padding: '1.5rem',

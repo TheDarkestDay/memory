@@ -8,16 +8,14 @@ import { visuallyHidden } from '../utils';
 const styles = {
   root: css({
     display: 'flex',
-    height: '100%',
+    minHeight: '100vh',
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'column',
     backgroundColor: '#304859',
-    paddingLeft: '1.5rem',
-    paddingRight: '1.5rem',
+    padding: '1.5rem',
     '@media (min-width: 768px)': {
-      paddingLeft: '0',
-      paddingRight: '0',
+      padding: '0'
     }
   }),
   title: css({
