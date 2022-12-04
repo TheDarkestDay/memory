@@ -33,7 +33,7 @@ export const createRouterWithContext = <TContext extends WebServerContext>(gameM
           };
 
           handleConnectedPlayersChange(
-            gameManager.getPlayersList(gameId)
+            gameManager.getConnectedPlayersList(gameId)
           );
 
           gameManager.on(gameId, 'playersListChange', handleConnectedPlayersChange);
@@ -57,6 +57,7 @@ export const createRouterWithContext = <TContext extends WebServerContext>(gameM
 
         if (playerId != null) {
           player = await gameManager.getPlayerById(gameId, playerId);
+          gameManager.connectPlayer(gameId, playerId);
         }
         
         return new Subscription<GameUiState | null>((emit) => {
@@ -78,7 +79,7 @@ export const createRouterWithContext = <TContext extends WebServerContext>(gameM
             gameManager.off(gameId, 'gameStateChange', handleGameStateChange);
 
             if (player != null) {
-              gameManager.removePlayer(gameId, player.name);
+              gameManager.disconnectPlayer(gameId, player.id);
             }
           };
         });

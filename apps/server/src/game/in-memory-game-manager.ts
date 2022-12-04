@@ -24,6 +24,7 @@ export class InMemoryGameManager implements GameManager {
       id: randomUUID(),
       service: null,
       players: [],
+      connectedPlayerIds: [],
       robots: [],
       theme,
       fieldSize,
@@ -63,11 +64,12 @@ export class InMemoryGameManager implements GameManager {
           shortName,
           isRobot: true, 
         });
+
+        targetGame.connectedPlayerIds.push(name);
       }
     }
 
     targetGame.players.push(...robotPlayers);
-    this.emit(gameId, 'playersListChange', targetGame.players);
 
     const machine = this.setUpGameMachine(targetGame);
     const service = interpret(machine).onTransition((state) => {
@@ -155,9 +157,25 @@ export class InMemoryGameManager implements GameManager {
 
     targetGame.players.push(newPlayer);
 
-    this.emit(gameId, 'playersListChange', targetGame.players);
-
     return newPlayer;
+  }
+
+  connectPlayer(gameId: string, playerId: string): void {
+    const targetGame = this.games.find(game => game.id === gameId);
+
+    if (targetGame == null) {
+      throw new Error(`Failed to add player to game with id ${gameId} because it does not exist`);
+    }
+
+    const { players, connectedPlayerIds } = targetGame;
+
+    if (players.every((player) => player.id !== playerId)) {
+      throw new Error(`Failed to connect player with id ${playerId} to game ${gameId}: This player has not yet joined the game`);
+    }
+
+    connectedPlayerIds.push(playerId);
+
+    this.notifyConnectedPlayersChange(targetGame);
   }
 
   async getPlayerById(gameId: string, id: string): Promise<Player> {
@@ -188,32 +206,32 @@ export class InMemoryGameManager implements GameManager {
     return targetGame.players.some((player) => player.id === playerId);
   }
 
-  removePlayer(gameId: string, playerName: string): void {
+  disconnectPlayer(gameId: string, playerId: string): void {
     const targetGame = this.games.find(game => game.id === gameId);
 
     if (targetGame == null) {
       throw new Error(`Failed to remove player from game with id ${gameId} because it does not exist`);
     }
 
-    const { players } = targetGame;
+    const { connectedPlayerIds } = targetGame;
 
-    const playerToRemoveIndex = players.findIndex((player) => player.name === playerName);
+    const playerIdToRemoveIndex = connectedPlayerIds.findIndex((id) => id === playerId);
 
-    if (playerToRemoveIndex !== -1) {
-      players.splice(playerToRemoveIndex, 1);
+    if (playerIdToRemoveIndex !== -1) {
+      connectedPlayerIds.splice(playerIdToRemoveIndex, 1);
     }
 
-    this.emit(gameId, 'playersListChange', players);
+    this.notifyConnectedPlayersChange(targetGame);
   }
 
-  getPlayersList(gameId: string): Player[] {
+  getConnectedPlayersList(gameId: string): Player[] {
     const targetGame = this.games.find(game => game.id === gameId);
 
     if (targetGame == null) {
       throw new Error(`Failed to get players list for game with id ${gameId} because it does not exist`);
     }
 
-    return targetGame.players;
+    return this.getConnectedPlayersData(targetGame);
   }
 
   getGameData(gameId: string): GameData {
@@ -284,6 +302,18 @@ export class InMemoryGameManager implements GameManager {
     return targetGame.service !== null;
   }
 
+  private notifyConnectedPlayersChange(game: Game) {
+    const { id } = game;
+
+    this.emit(id, 'playersListChange', this.getConnectedPlayersData(game));
+  }
+
+  private getConnectedPlayersData(game: Game) {
+    const { players, connectedPlayerIds } = game;
+
+    return connectedPlayerIds.map((playerId) => players.find((player) => player.id === playerId));
+  }
+
   private buildGameDataFromState(state: State<GameContext, AnyEventObject>): GameData {
     const { value, context } = state;
 
@@ -304,11 +334,14 @@ export class InMemoryGameManager implements GameManager {
     targetEventListeners.forEach((listener) => listener(payload as any));
   }
 
-  private setUpGameMachine({fieldSize, players, theme, speed}: Game) {
+  private setUpGameMachine(game: Game) {
+    const {fieldSize, theme, speed} = game;
     const checkScoreDelay = speed === 'normal' ? NORMAL_CHECK_SCORE_DELAY : RELAXING_CHECK_SCORE_DELAY;
 
+    const connectedPlayers = this.getConnectedPlayersData(game);
+
     return createGameMachine({
-      players: players.map((player) => player.name),
+      players: connectedPlayers.map((player) => player.name),
       field: this.gameFieldFactory.createGameField(fieldSize, theme),
     }, { checkScoreDelay });
   }

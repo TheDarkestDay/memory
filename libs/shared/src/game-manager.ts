@@ -30,8 +30,9 @@ export interface GameManager {
   startGame(gameId: string): void;
   restartGame(gameId: string): void;
   addPlayer(gameId: string): Player;
-  removePlayer(gameId: string, playerName: string): void;
-  getPlayersList(gameId: string): Player[];
+  connectPlayer(gameId: string, playerId: string): void;
+  disconnectPlayer(gameId: string, playerId: string): void;
+  getConnectedPlayersList(gameId: string): Player[];
   getGameData(gameId: string): GameData;
   getGameConfig(gameId: string): GameFormValues;
   isGameStarted(gameId: string): boolean;
@@ -52,6 +53,7 @@ export type Game = GameFormValues & {
   id: string;
   service: GameService;
   players: Player[];
+  connectedPlayerIds: string[];
   robots: RobotPlayer[];
 };
 
