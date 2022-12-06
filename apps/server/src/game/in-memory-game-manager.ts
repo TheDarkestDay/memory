@@ -71,6 +71,10 @@ export class InMemoryGameManager implements GameManager {
 
     targetGame.players.push(...robotPlayers);
 
+    if (robotPlayers.length !== 0) {
+      this.notifyConnectedPlayersChange(targetGame);
+    }
+
     const machine = this.setUpGameMachine(targetGame);
     const service = interpret(machine).onTransition((state) => {
       this.emit(gameId, 'gameStateChange', this.buildGameDataFromState(state));

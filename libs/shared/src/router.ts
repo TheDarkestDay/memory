@@ -57,7 +57,6 @@ export const createRouterWithContext = <TContext extends WebServerContext>(gameM
 
         if (playerId != null) {
           player = await gameManager.getPlayerById(gameId, playerId);
-          gameManager.connectPlayer(gameId, playerId);
         }
         
         return new Subscription<GameUiState | null>((emit) => {
@@ -94,7 +93,12 @@ export const createRouterWithContext = <TContext extends WebServerContext>(gameM
         const { playerId } = ctx;
 
         const player = await getOrCreatePlayer(playerId, gameId, ctx);
+        if (player === null) {
+          throw new Error(`This player does not belong to this game`);
+        }
+
         const gameConfig = gameManager.getGameConfig(gameId);
+        gameManager.connectPlayer(gameId, player.id);
 
         return {
           ...gameConfig,
